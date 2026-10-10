@@ -1,0 +1,63 @@
+<?php
+/**
+ * Lwb-dashboard — widget « LEWEBMAX en un coup d'œil » sur l'accueil de l'administration.
+ */
+
+if (!defined('WHMCS')) {
+    die('Accès direct interdit.');
+}
+
+require_once __DIR__ . '/lib/data.php';
+require_once __DIR__ . '/lib/view.php';
+
+if (class_exists('\WHMCS\Module\AbstractWidget')) {
+    class LwbDashboardWidget extends \WHMCS\Module\AbstractWidget
+    {
+        protected $title = 'LEWEBMAX en un coup d\'œil';
+        protected $description = 'Encaissements, impayés, renouvellements et domaines à risque.';
+        protected $weight = 5;
+        protected $columns = 1;
+        protected $cache = true;
+        protected $cacheExpiry = 300;
+        protected $requiredPermission = '';
+
+        public function getData()
+        {
+            $d = lwbd_collect(6);
+            return [
+                'month' => $d['month']['current'],
+                'mrr' => $d['mrr'],
+                'unpaid' => $d['unpaid']['total'],
+                'unpaid_count' => $d['unpaid']['count'],
+                'renewals' => count($d['renewals']),
+                'risks' => count(array_filter($d['domain_risks'], function ($r) {
+                    return $r['level'] === 'critical';
+                })),
+                'pending' => $d['orders']['pending'],
+                'tickets' => $d['tickets']['waiting'],
+            ];
+        }
+
+        public function generateOutput($data)
+        {
+            $cell = function ($label, $value, $alert = false) {
+                return '<div style="padding:10px 12px;border:1px solid #e6e9f2;border-radius:10px;background:#fff">'
+                    . '<div style="font-size:11px;font-weight:700;color:#575b78">' . lwbd_e($label) . '</div>'
+                    . '<div style="font-size:18px;font-weight:800;color:' . ($alert ? '#b42318' : '#0d0d2b') . ';white-space:nowrap">' . lwbd_e($value) . '</div></div>';
+            };
+            return '<div style="padding:12px;font-family:\'Plus Jakarta Sans\',-apple-system,Segoe UI,Arial,sans-serif">'
+                . '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'
+                . $cell('Encaissé ce mois', lwbd_money($data['month']))
+                . $cell('Revenu récurrent / mois', lwbd_money($data['mrr']))
+                . $cell('Impayés (' . $data['unpaid_count'] . ')', lwbd_money($data['unpaid']), $data['unpaid'] > 0)
+                . $cell('Renouvellements 30 j', (string) $data['renewals'])
+                . $cell('Domaines en danger', (string) $data['risks'], $data['risks'] > 0)
+                . $cell('Tickets à traiter', (string) $data['tickets'], $data['tickets'] > 0)
+                . '</div><a href="addonmodules.php?module=lwb_dashboard" style="display:block;margin-top:10px;padding:9px;border-radius:10px;background:#030673;color:#fff;text-align:center;font-weight:700;text-decoration:none">Ouvrir le tableau de bord complet →</a></div>';
+        }
+    }
+
+    add_hook('AdminHomeWidgets', 1, function () {
+        return new LwbDashboardWidget();
+    });
+}
