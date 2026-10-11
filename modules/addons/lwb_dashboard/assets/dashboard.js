@@ -1,7 +1,7 @@
 (function () {
     var root = document.getElementById('lwbd');
     if (!root) { return; }
-    var tip = root.querySelector('.lwbd-tip');
+    var tip = root.querySelector('.lwbd-tip') || document.createElement('div');
     // Sur petit écran, le graphique défile : on montre d'abord les mois les plus récents.
     Array.prototype.forEach.call(root.querySelectorAll('.lwbd-chart-wrap'), function (w) { w.scrollLeft = w.scrollWidth; });
     // Afficher les lignes masquées d'un tableau.
@@ -10,6 +10,11 @@
         if (more) {
             Array.prototype.forEach.call(document.querySelectorAll('#' + more.getAttribute('data-target') + ' .lwbd-extra'), function (tr) { tr.hidden = false; });
             more.remove();
+            return;
+        }
+        var all = e.target.closest('[data-check="all"]');
+        if (all) {
+            Array.prototype.forEach.call(root.querySelectorAll('input[name="show[]"]'), function (i) { i.checked = true; });
             return;
         }
         var btn = e.target.closest('[data-export]');

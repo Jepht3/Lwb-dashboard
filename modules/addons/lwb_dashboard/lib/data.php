@@ -312,3 +312,21 @@ function lwbd_collect($months = 12)
     $d['late_fees'] = round((float) ($cats['Pénalités de retard'] ?? 0), 2);
     return $d;
 }
+
+/** Réglages du tableau de bord (tbladdonmodules), avec valeurs par défaut. */
+function lwbd_settings()
+{
+    $rows = Capsule::table('tbladdonmodules')->where('module', 'lwb_dashboard')->pluck('value', 'setting')->all();
+    return [
+        'goal' => (string) ($rows['goal'] ?? '500'),
+        'period' => in_array((int) ($rows['period'] ?? 12), [6, 12, 24], true) ? (int) $rows['period'] : 12,
+        'homepage' => (string) ($rows['homepage'] ?? ''),
+        'hidden' => array_values(array_filter(explode(',', (string) ($rows['hidden'] ?? '')))),
+        'access' => (string) ($rows['access'] ?? ''),
+    ];
+}
+
+function lwbd_save_setting($name, $value)
+{
+    Capsule::table('tbladdonmodules')->updateOrInsert(['module' => 'lwb_dashboard', 'setting' => $name], ['value' => (string) $value]);
+}

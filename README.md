@@ -39,7 +39,7 @@ Tableau de bord d'administration pour WHMCS 8, aux couleurs de LEWEBMAX. Il réu
 
 Chaque ligne renvoie vers la fiche correspondante : client, facture, service, domaine, commande ou ticket. La page s'adapte au mobile.
 
-L'extension ne modifie aucune donnée. Seule exception : le bouton « Relancer », qui envoie un e-mail à la demande de l'administrateur, protégé par le jeton de sécurité de WHMCS. Les graphiques sont en SVG généré côté serveur, sans bibliothèque JavaScript externe.
+L'extension ne modifie aucune donnée. Seules exceptions : le bouton « Relancer », qui envoie un e-mail, et la page Réglages. Les deux agissent uniquement à la demande de l'administrateur et sont protégés par le jeton de sécurité de WHMCS. Les graphiques sont en SVG généré côté serveur, sans bibliothèque JavaScript externe.
 
 ## Installation
 
@@ -50,13 +50,17 @@ L'extension ne modifie aucune donnée. Seule exception : le bouton « Relancer �
 
 ## Réglages
 
-Dans **Configuration › Modules complémentaires › Lwb-dashboard › Configurer** :
+Le bouton **Réglages**, en haut du tableau de bord, ouvre une page dans le même design :
 
-| Réglage | Rôle |
-|---|---|
-| Objectif mensuel (USD) | Montant visé chaque mois (jauge « Objectif du mois »). Laissez vide pour la masquer. |
-| Période par défaut | 6, 12 ou 24 mois à l'ouverture. |
-| Page d'accueil de l'admin | Ouvre le tableau de bord après la connexion, à la place de l'accueil WHMCS. Le lien « Accueil WHMCS classique » reste disponible en haut de la page. |
+![Page Réglages](docs/apercu-reglages.png)
+
+- **Objectif et période** :
+  - objectif d'encaissement mensuel ; laissez le champ vide pour masquer la jauge ;
+  - période affichée à l'ouverture : 6, 12 ou 24 mois.
+- **Démarrage** : ouvre le tableau de bord après la connexion, à la place de l'accueil WHMCS. Le lien « Accueil WHMCS classique » reste disponible.
+- **Sections affichées** : un interrupteur par carte pour masquer ce qui ne sert pas. Quand une carte est masquée, sa voisine prend toute la largeur.
+
+Les administrateurs autorisés se choisissent toujours dans WHMCS (Configuration › Modules complémentaires), comme pour toute extension.
 
 ## Compatibilité
 
@@ -71,7 +75,7 @@ modules/addons/lwb_dashboard/
 ├── hooks.php           widget de l'accueil, redirection vers le tableau de bord
 ├── lib/data.php        calcul des chiffres (requêtes en lecture seule)
 ├── lib/health.php      santé du système, objectif et prévisions
-├── lib/actions.php     bouton « Relancer » (jeton CSRF WHMCS)
+├── lib/actions.php     bouton « Relancer » et enregistrement des réglages (jeton CSRF WHMCS)
 ├── lib/view.php        affichage HTML et graphiques SVG
 └── assets/             styles et info-bulles
 ```
@@ -84,6 +88,7 @@ Les captures utilisent des données d'exemple.
 
 ## Historique
 
+- **1.2** : nouvelle page Réglages dans le design du tableau de bord (interrupteurs, choix de la période, sections à afficher). Les champs de l'ancienne page de configuration WHMCS sont supprimés.
 - **1.1** :
   - réglages : objectif, période, page d'accueil ;
   - objectif du mois et prévisions ;

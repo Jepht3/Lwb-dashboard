@@ -48,6 +48,12 @@ function lwbd_icon($name)
         'chat' => '<path d="M4 5h16v11H8l-4 4z"/>',
         'up' => '<path d="M12 19V5M6 11l6-6 6 6"/>',
         'down' => '<path d="M12 5v14M6 13l6 6 6-6"/>',
+        'gear' => '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>',
+        'back' => '<path d="M15 18l-6-6 6-6"/>',
+        'home' => '<path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/>',
+        'eye' => '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+        'target' => '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/>',
+        'lock' => '<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
         'tool' => '<path d="M14.7 6.3a4 4 0 0 0-5.4 5.2L3 17.8V21h3.2l6.3-6.3a4 4 0 0 0 5.2-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/>',
     ][$name] ?? '';
     return '<svg class="lwbd-ic" viewBox="0 0 24 24" aria-hidden="true">' . $p . '</svg>';
@@ -296,7 +302,7 @@ function lwbd_render(array $d, $modulelink, array $opt = [])
         . '<a class="lwbd-btn" href="ordersadd.php">+ Commande</a>'
         . '<a class="lwbd-btn" href="clientsadd.php">+ Client</a>'
         . '<a class="lwbd-btn" href="supporttickets.php?action=open">+ Ticket</a>'
-        . '<a class="lwbd-btn ghost" href="configaddonmods.php#lwb_dashboard" title="Objectif, période, page d\'accueil">Réglages</a></div>';
+        . '<a class="lwbd-btn ghost" href="' . lwbd_e($modulelink . '&view=settings') . '">' . lwbd_icon('gear') . 'Réglages</a></div>';
 
     $flash = '';
     if (!empty($opt['flash'])) {
@@ -305,30 +311,49 @@ function lwbd_render(array $d, $modulelink, array $opt = [])
         $flash = '<div class="lwbd-flash lwbd-' . $level . '" role="status">' . lwbd_e($msg) . '</div>';
     }
 
-    $goalCard = isset($opt['forecast']) ? lwbd_card('Objectif de ' . lwbd_month_label(date('Y-m'), true), lwbd_goal_html($opt['forecast'], $d), '', 'span-4') : '';
-    $healthCard = isset($opt['health']) ? lwbd_card('Santé du système', lwbd_health_html($opt['health']), '', 'span-6') : '';
+    $hidden = $opt['hidden'] ?? [];
+    $show = function ($key) use ($hidden) {
+        return !in_array($key, $hidden, true);
+    };
     $exp = function ($id) {
         return '<button type="button" class="lwbd-export" data-export="' . $id . '" title="Télécharger en CSV (Excel)">CSV</button>';
     };
+    // Les cartes vont par paires ; si l'une est masquée, l'autre prend toute la largeur.
+    $pairs = [
+        [['chart', 'span-8', fn () => lwbd_card('Encaissements nets par mois', $revenue, $chips)],
+         ['goal', 'span-4', fn () => isset($opt['forecast']) ? lwbd_card('Objectif de ' . lwbd_month_label(date('Y-m'), true), lwbd_goal_html($opt['forecast'], $d)) : '']],
+        [['unpaid', 'span-4', fn () => lwbd_card('Impayés par ancienneté', $unpaidCard, '<span class="lwbd-tools">' . $exp('lwbd-t-unpaid') . '<a class="lwbd-link" href="invoices.php?status=Unpaid">Toutes →</a></span>')],
+         ['renewals', 'span-8', fn () => lwbd_card('À renouveler dans les 30 jours', $renewals, '<span class="lwbd-tools">' . ($ren ? $exp('lwbd-t-renew') : '') . '<span class="lwbd-count">' . $renCount . '</span></span>')]],
+        [['risks', 'span-6', fn () => lwbd_card('Domaines à surveiller', $risks, '<span class="lwbd-tools">' . ($risk ? $exp('lwbd-t-risks') : '') . '<span class="lwbd-count">' . count($d['domain_risks']) . '</span></span>')],
+         ['health', 'span-6', fn () => isset($opt['health']) ? lwbd_card('Santé du système', lwbd_health_html($opt['health'])) : '']],
+        [['categories', 'span-6', fn () => lwbd_card('Revenus par activité · ' . $d['months'] . ' mois', ($catRows ? lwbd_hbars($catRows) : lwbd_empty('Aucune facture payée sur la période.')) . $lateFees . $maint)],
+         ['gateways', 'span-6', fn () => lwbd_card('Moyens de paiement · ' . $d['months'] . ' mois', $gwRows ? lwbd_hbars($gwRows) : lwbd_empty('Aucun paiement sur la période.'))]],
+        [['orders', 'span-6', fn () => lwbd_card('Dernières commandes', $orders ? '<div class="lwbd-scroll"><table class="lwbd-table">' . $orders . '</table></div>' : lwbd_empty('Aucune commande.'), '<a class="lwbd-link" href="orders.php">Toutes →</a>')],
+         ['payments', 'span-6', fn () => lwbd_card('Derniers paiements', $pay ? '<div class="lwbd-scroll"><table class="lwbd-table">' . $pay . '</table></div>' : lwbd_empty('Aucun paiement.'), '<a class="lwbd-link" href="transactions.php">Toutes →</a>')]],
+        [['tickets', 'span-6', fn () => lwbd_card('Tickets à traiter', $tick ? '<ul class="lwbd-list">' . $tick . '</ul>' : lwbd_empty('Aucun ticket en attente de réponse. 👍'), '<a class="lwbd-link" href="supporttickets.php">Tous →</a>')],
+         ['top', 'span-6', fn () => lwbd_card('Meilleurs clients · ' . $d['months'] . ' mois', $top ? lwbd_hbars($top) : lwbd_empty('Aucun paiement sur la période.'))]],
+    ];
+    $grid = '';
+    foreach ($pairs as $pair) {
+        $cards = [];
+        foreach ($pair as [$key, $span, $make]) {
+            if ($key === 'chart' || $show($key)) {
+                $html = $make();
+                if ($html !== '') {
+                    $cards[] = [$span, $html];
+                }
+            }
+        }
+        foreach ($cards as [$span, $html]) {
+            $grid .= preg_replace('/^<section class="lwbd-card /', '<section class="lwbd-card ' . (count($cards) === 1 ? 'span-12' : $span) . ' ', $html, 1);
+        }
+    }
 
     $html = '<div class="lwbd" id="lwbd">'
         . '<div class="lwbd-head"><div><p class="lwbd-eyebrow">LEWEBMAX · ' . lwbd_e(lwbd_date($d['today'])) . ' · <a href="index.php?lwbd=classic">Accueil WHMCS classique</a></p><h1>Tableau de bord</h1></div>' . $actions . '</div>'
         . $flash
-        . $kpis
-        . '<div class="lwbd-grid">'
-        . lwbd_card('Encaissements nets par mois', $revenue, $chips, $goalCard ? 'span-8' : 'span-12')
-        . $goalCard
-        . lwbd_card('Impayés par ancienneté', $unpaidCard, '<span class="lwbd-tools">' . $exp('lwbd-t-unpaid') . '<a class="lwbd-link" href="invoices.php?status=Unpaid">Toutes →</a></span>', 'span-4')
-        . lwbd_card('À renouveler dans les 30 jours', $renewals, '<span class="lwbd-tools">' . ($ren ? $exp('lwbd-t-renew') : '') . '<span class="lwbd-count">' . $renCount . '</span></span>', 'span-8')
-        . lwbd_card('Domaines à surveiller', $risks, '<span class="lwbd-tools">' . ($risk ? $exp('lwbd-t-risks') : '') . '<span class="lwbd-count">' . count($d['domain_risks']) . '</span></span>', $healthCard ? 'span-6' : 'span-12')
-        . $healthCard
-        . lwbd_card('Revenus par activité · ' . $d['months'] . ' mois', ($catRows ? lwbd_hbars($catRows) : lwbd_empty('Aucune facture payée sur la période.')) . $lateFees . $maint, '', 'span-6')
-        . lwbd_card('Moyens de paiement · ' . $d['months'] . ' mois', $gwRows ? lwbd_hbars($gwRows) : lwbd_empty('Aucun paiement sur la période.'), '', 'span-6')
-        . lwbd_card('Dernières commandes', $orders ? '<div class="lwbd-scroll"><table class="lwbd-table">' . $orders . '</table></div>' : lwbd_empty('Aucune commande.'), '<a class="lwbd-link" href="orders.php">Toutes →</a>', 'span-6')
-        . lwbd_card('Derniers paiements', $pay ? '<div class="lwbd-scroll"><table class="lwbd-table">' . $pay . '</table></div>' : lwbd_empty('Aucun paiement.'), '<a class="lwbd-link" href="transactions.php">Toutes →</a>', 'span-6')
-        . lwbd_card('Tickets à traiter', $tick ? '<ul class="lwbd-list">' . $tick . '</ul>' : lwbd_empty('Aucun ticket en attente de réponse. 👍'), '<a class="lwbd-link" href="supporttickets.php">Tous →</a>', 'span-6')
-        . lwbd_card('Meilleurs clients · ' . $d['months'] . ' mois', $top ? lwbd_hbars($top) : lwbd_empty('Aucun paiement sur la période.'), '', 'span-6')
-        . '</div><div class="lwbd-tip" role="tooltip" hidden></div></div>';
+        . ($show('kpis') ? $kpis : '')
+        . '<div class="lwbd-grid">' . $grid . '</div><div class="lwbd-tip" role="tooltip" hidden></div></div>';
 
     return lwbd_style() . $html . lwbd_script();
 }
@@ -348,7 +373,7 @@ function lwbd_goal_html(array $f, array $d)
                 : lwbd_badge($level, $f['pace'] >= $f['goal'] ? 'En bonne voie' : 'En dessous du rythme') . ' encore ' . lwbd_e(lwbd_money(max(0, $f['goal'] - $f['current']))) . ' en ' . $f['days_left'] . ' jour(s)')
             . '</p></div>';
     } else {
-        $html .= '<p class="lwbd-empty">Fixez un objectif mensuel dans les <a href="configaddonmods.php#lwb_dashboard">réglages</a> pour suivre votre progression.</p>';
+        $html .= '<p class="lwbd-empty">Fixez un objectif mensuel dans les réglages du tableau de bord pour suivre votre progression.</p>';
     }
     $rows = [
         ['Projection fin de mois (rythme actuel)', lwbd_money($f['pace'])],
@@ -399,6 +424,74 @@ function lwbd_health_html(array $h)
         $html .= '</ul></details>';
     }
     return $html . '<p class="lwbd-note">' . $h['emails_today'] . ' e-mail(s) envoyé(s) aujourd\'hui.</p>';
+}
+
+/** Sections que l'on peut masquer : clé => [titre, description]. */
+function lwbd_sections()
+{
+    return [
+        'kpis' => ['Indicateurs clés', 'Les 8 chiffres en haut de page.'],
+        'goal' => ['Objectif du mois', 'Jauge, projection et encaissements attendus.'],
+        'unpaid' => ['Impayés par ancienneté', 'Retards et plus gros soldes, avec le bouton « Relancer ».'],
+        'renewals' => ['Renouvellements à 30 jours', 'Échéances à venir et état des factures.'],
+        'risks' => ['Domaines à surveiller', 'Période de grâce, payés non renouvelés, sans registraire.'],
+        'health' => ['Santé du système', 'Cron, registraire, erreurs, résiliations.'],
+        'categories' => ['Revenus par activité', 'Répartition par catégorie de produits.'],
+        'gateways' => ['Moyens de paiement', 'PayPal, FlexPay…'],
+        'orders' => ['Dernières commandes', 'Les 8 dernières commandes.'],
+        'payments' => ['Derniers paiements', 'Les 8 derniers encaissements.'],
+        'tickets' => ['Tickets à traiter', 'Tickets en attente de votre réponse.'],
+        'top' => ['Meilleurs clients', 'Clients qui ont le plus payé sur la période.'],
+    ];
+}
+
+function lwbd_switch($name, $checked, $label, $desc, $value = 'on')
+{
+    $id = 'lwbd-' . preg_replace('/[^a-z0-9]+/i', '-', $name . '-' . $value);
+    return '<label class="lwbd-switch-row" for="' . $id . '"><span><b>' . lwbd_e($label) . '</b><small>' . lwbd_e($desc) . '</small></span>'
+        . '<input type="checkbox" class="lwbd-switch" id="' . $id . '" name="' . lwbd_e($name) . '" value="' . lwbd_e($value) . '"' . ($checked ? ' checked' : '') . '></label>';
+}
+
+/** Page « Réglages » du tableau de bord, dans le même design. */
+function lwbd_settings_render(array $set, $modulelink, $token, $flash = null)
+{
+    $hidden = $set['hidden'];
+    $period = (int) $set['period'];
+    $seg = '';
+    foreach ([6, 12, 24] as $p) {
+        $seg .= '<label class="lwbd-seg"><input type="radio" name="period" value="' . $p . '"' . ($p === $period ? ' checked' : '') . '><span>' . $p . ' mois</span></label>';
+    }
+    $sections = '';
+    foreach (lwbd_sections() as $key => [$label, $desc]) {
+        $sections .= lwbd_switch('show[]', !in_array($key, $hidden, true), $label, $desc, $key);
+    }
+    $msg = '';
+    if ($flash) {
+        $level = ['success' => 'good', 'warning' => 'warning', 'danger' => 'critical'][$flash[0]] ?? 'info';
+        $msg = '<div class="lwbd-flash lwbd-' . $level . '" role="status">' . lwbd_e($flash[1]) . '</div>';
+    }
+    $html = '<div class="lwbd lwbd-settings" id="lwbd">'
+        . '<div class="lwbd-head"><div><p class="lwbd-eyebrow"><a href="' . lwbd_e($modulelink) . '">' . lwbd_icon('back') . 'Tableau de bord</a></p><h1>Réglages</h1></div></div>'
+        . $msg
+        . '<form method="post" action="' . lwbd_e($modulelink . '&view=settings') . '" class="lwbd-form">' . $token
+        . '<input type="hidden" name="lwbd_action" value="settings">'
+        . '<div class="lwbd-set-grid">'
+        . '<section class="lwbd-card"><header class="lwbd-set-h"><span class="lwbd-kpi-ic">' . lwbd_icon('target') . '</span><div><h2>Objectif et période</h2><p>Ce que vous visez chaque mois et la période des graphiques.</p></div></header>'
+        . '<label class="lwbd-field"><span>Objectif d\'encaissement mensuel</span><span class="lwbd-input"><input type="number" name="goal" min="0" step="10" inputmode="decimal" value="' . lwbd_e($set['goal']) . '" placeholder="Aucun"><em>$ / mois</em></span>'
+        . '<small>Laissez vide pour masquer la jauge « Objectif du mois ».</small></label>'
+        . '<div class="lwbd-field"><span>Période affichée à l\'ouverture</span><div class="lwbd-segs" role="radiogroup">' . $seg . '</div></div>'
+        . '</section>'
+        . '<section class="lwbd-card"><header class="lwbd-set-h"><span class="lwbd-kpi-ic">' . lwbd_icon('home') . '</span><div><h2>Démarrage</h2><p>Ce que vous voyez en vous connectant à l\'administration.</p></div></header>'
+        . lwbd_switch('homepage', $set['homepage'] === 'on', 'Ouvrir le tableau de bord après la connexion', 'À la place de l\'accueil WHMCS. Le lien « Accueil WHMCS classique » reste disponible en haut du tableau de bord.')
+        . '<div class="lwbd-set-note">' . lwbd_icon('lock') . '<span>Les administrateurs autorisés à voir le tableau de bord se choisissent dans WHMCS, rubrique <a href="configaddonmods.php#lwb_dashboard">Modules complémentaires</a>.</span></div>'
+        . '</section>'
+        . '<section class="lwbd-card lwbd-set-wide"><header class="lwbd-set-h"><span class="lwbd-kpi-ic">' . lwbd_icon('eye') . '</span><div><h2>Sections affichées</h2><p>Masquez ce dont vous n\'avez pas besoin. Le graphique des encaissements reste toujours affiché.</p></div>'
+        . '<span class="lwbd-tools"><button type="button" class="lwbd-mini-btn" data-check="all">Tout afficher</button></span></header>'
+        . '<div class="lwbd-switch-grid">' . $sections . '</div></section>'
+        . '</div>'
+        . '<div class="lwbd-savebar"><span>Les changements s\'appliquent dès l\'enregistrement.</span><div><a class="lwbd-btn" href="' . lwbd_e($modulelink) . '">Annuler</a><button type="submit" class="lwbd-btn primary">Enregistrer</button></div></div>'
+        . '</form></div>';
+    return lwbd_style() . $html . lwbd_script();
 }
 
 function lwbd_style()

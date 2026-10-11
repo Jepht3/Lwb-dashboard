@@ -26,35 +26,16 @@ function lwb_dashboard_config()
     return [
         'name' => 'Lwb-dashboard',
         'description' => 'Tableau de bord LEWEBMAX : encaissements, revenu récurrent, impayés, renouvellements, domaines à risque, commandes et tickets sur une seule page.',
-        'version' => '1.1',
+        'version' => '1.2',
         'author' => 'LEWEBMAX',
-        'fields' => [
-            'goal' => [
-                'FriendlyName' => 'Objectif mensuel (USD)',
-                'Type' => 'text',
-                'Size' => '10',
-                'Default' => '500',
-                'Description' => 'Montant à encaisser chaque mois. Laissez vide pour masquer la jauge.',
-            ],
-            'period' => [
-                'FriendlyName' => 'Période par défaut',
-                'Type' => 'dropdown',
-                'Options' => ['6' => '6 mois', '12' => '12 mois', '24' => '24 mois'],
-                'Default' => '12',
-                'Description' => 'Période affichée à l\'ouverture du tableau de bord.',
-            ],
-            'homepage' => [
-                'FriendlyName' => 'Page d\'accueil de l\'admin',
-                'Type' => 'yesno',
-                'Description' => 'Ouvrir ce tableau de bord à la place de l\'accueil WHMCS (lien « Accueil WHMCS classique » toujours disponible).',
-            ],
-        ],
+        // Les réglages se font sur la page « Réglages » du tableau de bord, dans le même design.
+        'fields' => [],
     ];
 }
 
 function lwb_dashboard_upgrade($vars)
 {
-    // 1.0 -> 1.1 : rien à migrer (les réglages ont des valeurs par défaut).
+    // Rien à migrer : les réglages existants (objectif, période, accueil) sont repris tels quels.
 }
 
 function lwb_dashboard_activate()
@@ -71,12 +52,22 @@ function lwb_dashboard_output($vars)
 {
     try {
         $flash = lwbd_handle_actions();
-        $d = lwbd_collect((int) ($_GET['p'] ?? ($vars['period'] ?? 12)));
+        $set = lwbd_settings();
+        $token = function_exists('generate_token') ? generate_token('form') : '';
+        if (($_GET['view'] ?? '') === 'settings') {
+            echo lwbd_settings_render($set, $vars['modulelink'], $token, $flash);
+            return;
+        }
+        $d = lwbd_collect((int) ($_GET['p'] ?? $set['period']));
+        $show = function ($key) use ($set) {
+            return !in_array($key, $set['hidden'], true);
+        };
         echo lwbd_render($d, $vars['modulelink'], [
             'flash' => $flash,
-            'token' => function_exists('generate_token') ? generate_token('form') : '',
-            'forecast' => lwbd_forecast($d, (float) str_replace(',', '.', (string) ($vars['goal'] ?? 0))),
-            'health' => lwbd_health(),
+            'token' => $token,
+            'hidden' => $set['hidden'],
+            'forecast' => $show('goal') ? lwbd_forecast($d, (float) $set['goal']) : null,
+            'health' => $show('health') ? lwbd_health() : null,
         ]);
     } catch (\Throwable $e) {
         logActivity('Lwb-dashboard : ' . $e->getMessage());

@@ -13,12 +13,6 @@ require_once __DIR__ . '/lib/view.php';
 
 use WHMCS\Database\Capsule;
 
-/** Réglage du module (tbladdonmodules). */
-function lwbd_setting($name)
-{
-    return (string) Capsule::table('tbladdonmodules')->where('module', 'lwb_dashboard')->where('setting', $name)->value('value');
-}
-
 /**
  * Tableau de bord comme page d'accueil de l'admin : redirige index.php sans
  * paramètre (c'est là qu'arrive l'admin après connexion), seulement si
@@ -27,12 +21,12 @@ function lwbd_setting($name)
 add_hook('AdminAreaPage', 1, function ($vars) {
     try {
         if (($vars['filename'] ?? '') !== 'index' || !empty($_GET) || ($_SERVER['REQUEST_METHOD'] ?? '') !== 'GET'
-            || lwbd_setting('homepage') !== 'on') {
+            || lwbd_settings()['homepage'] !== 'on') {
             return [];
         }
         $adminId = (int) ($_SESSION['adminid'] ?? 0);
         $role = (int) Capsule::table('tbladmins')->where('id', $adminId)->value('roleid');
-        $allowed = array_map('intval', explode(',', lwbd_setting('access')));
+        $allowed = array_map('intval', explode(',', lwbd_settings()['access']));
         if (!$adminId || !in_array($role, $allowed, true)) {
             return [];
         }
