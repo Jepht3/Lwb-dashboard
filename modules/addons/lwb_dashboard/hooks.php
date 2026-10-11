@@ -8,7 +8,40 @@ if (!defined('WHMCS')) {
 }
 
 require_once __DIR__ . '/lib/data.php';
+require_once __DIR__ . '/lib/health.php';
 require_once __DIR__ . '/lib/view.php';
+
+use WHMCS\Database\Capsule;
+
+/** Réglage du module (tbladdonmodules). */
+function lwbd_setting($name)
+{
+    return (string) Capsule::table('tbladdonmodules')->where('module', 'lwb_dashboard')->where('setting', $name)->value('value');
+}
+
+/**
+ * Tableau de bord comme page d'accueil de l'admin : redirige index.php sans
+ * paramètre (c'est là qu'arrive l'admin après connexion), seulement si
+ * l'administrateur a accès au module.
+ */
+add_hook('AdminAreaPage', 1, function ($vars) {
+    try {
+        if (($vars['filename'] ?? '') !== 'index' || !empty($_GET) || ($_SERVER['REQUEST_METHOD'] ?? '') !== 'GET'
+            || lwbd_setting('homepage') !== 'on') {
+            return [];
+        }
+        $adminId = (int) ($_SESSION['adminid'] ?? 0);
+        $role = (int) Capsule::table('tbladmins')->where('id', $adminId)->value('roleid');
+        $allowed = array_map('intval', explode(',', lwbd_setting('access')));
+        if (!$adminId || !in_array($role, $allowed, true)) {
+            return [];
+        }
+        header('Location: addonmodules.php?module=lwb_dashboard');
+        exit;
+    } catch (\Throwable $e) {
+        return [];
+    }
+});
 
 if (class_exists('\WHMCS\Module\AbstractWidget')) {
     class LwbDashboardWidget extends \WHMCS\Module\AbstractWidget
@@ -24,7 +57,9 @@ if (class_exists('\WHMCS\Module\AbstractWidget')) {
         public function getData()
         {
             $d = lwbd_collect(6);
+            $h = lwbd_health();
             return [
+                'alerts' => (int) !$h['cron']['ok'] + (int) $h['registrar']['no_credit'],
                 'month' => $d['month']['current'],
                 'mrr' => $d['mrr'],
                 'unpaid' => $d['unpaid']['total'],
@@ -45,7 +80,8 @@ if (class_exists('\WHMCS\Module\AbstractWidget')) {
                     . '<div style="font-size:11px;font-weight:700;color:#575b78">' . lwbd_e($label) . '</div>'
                     . '<div style="font-size:18px;font-weight:800;color:' . ($alert ? '#b42318' : '#0d0d2b') . ';white-space:nowrap">' . lwbd_e($value) . '</div></div>';
             };
-            return '<div style="padding:12px;font-family:\'Plus Jakarta Sans\',-apple-system,Segoe UI,Arial,sans-serif">'
+            $alert = $data['alerts'] ? '<a href="addonmodules.php?module=lwb_dashboard" style="display:block;margin-bottom:8px;padding:9px 12px;border-radius:10px;background:#fdecec;color:#b42318;font-weight:700;text-decoration:none">⚠ ' . (int) $data['alerts'] . ' alerte(s) urgente(s) : cron ou crédit du registraire</a>' : '';
+            return '<div style="padding:12px;font-family:\'Plus Jakarta Sans\',-apple-system,Segoe UI,Arial,sans-serif">' . $alert
                 . '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'
                 . $cell('Encaissé ce mois', lwbd_money($data['month']))
                 . $cell('Revenu récurrent / mois', lwbd_money($data['mrr']))

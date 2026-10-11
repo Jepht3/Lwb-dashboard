@@ -41,7 +41,7 @@ a.lwbd-kpi:hover{box-shadow:0 6px 18px rgba(13,13,43,.08); transform:translateY(
 
 .lwbd-grid{display:grid; grid-template-columns:repeat(12,minmax(0,1fr)); gap:16px; align-items:start}
 .lwbd-card{background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:18px 20px; min-width:0}
-.span-4{grid-column:span 4} .span-6{grid-column:span 6} .span-8{grid-column:span 8}
+.span-4{grid-column:span 4} .span-6{grid-column:span 6} .span-8{grid-column:span 8} .span-12{grid-column:span 12}
 .lwbd-card-h{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:12px}
 .lwbd-card-h h2{font-size:15px; font-weight:800}
 .lwbd-sub{font-size:12px; font-weight:800; color:var(--ink-2); text-transform:uppercase; letter-spacing:.08em; margin:18px 0 6px!important}
@@ -114,6 +114,31 @@ a.lwbd-kpi:hover{box-shadow:0 6px 18px rgba(13,13,43,.08); transform:translateY(
 .lwbd-tip{position:fixed; z-index:9999; pointer-events:none; background:#0d0d2b; color:#fff; padding:8px 11px; border-radius:9px; font-size:12px; line-height:1.45; box-shadow:0 8px 24px rgba(13,13,43,.25); max-width:240px}
 .lwbd-tip b{display:block; font-size:13px}
 .lwbd-tip span{display:block; color:#c8cbe6}
+
+/* v1.1 : objectif, santé, actions, exports */
+.lwbd-btn.ghost{background:transparent}
+.lwbd-flash{margin:0 0 14px; padding:12px 16px; border-radius:12px; font-weight:700; font-size:13.5px}
+.lwbd-tools{display:inline-flex; align-items:center; gap:8px}
+.lwbd-export,.lwbd-mini-btn{height:26px; padding:0 10px; border:1px solid var(--line); border-radius:8px; background:var(--surface); color:var(--ink-2); font:700 11.5px/1 inherit; cursor:pointer}
+.lwbd-export:hover,.lwbd-mini-btn:hover{border-color:var(--brand); color:var(--brand)}
+.lwbd-inline{display:block; margin:6px 0 0}
+.lwbd-cellbadge{margin-top:5px}
+.lwbd-showmore{display:block; width:100%; margin-top:10px; padding:8px; border:1px dashed var(--line); border-radius:10px; background:transparent; color:var(--brand); font:700 12px inherit; cursor:pointer}
+.lwbd-goal{margin-bottom:14px}
+.lwbd-goal-top{display:flex; align-items:baseline; justify-content:space-between; gap:8px; margin-bottom:8px; font-size:13px; color:var(--ink-2)}
+.lwbd-goal-pct{font-size:30px; font-weight:800; color:var(--ink); letter-spacing:-.02em}
+.lwbd-goal-track{height:12px}
+.lwbd-goal-msg{margin:10px 0 0; font-size:12.5px; color:var(--ink-2); display:flex; align-items:center; gap:6px; flex-wrap:wrap}
+.lwbd-hfill.lwbd-good{background:var(--good)}
+.lwbd-dl{margin:0; border-top:1px solid var(--line-soft)}
+.lwbd-dl div{display:flex; justify-content:space-between; gap:10px; padding:9px 0; border-bottom:1px solid var(--line-soft)}
+.lwbd-dl div:last-child{border-bottom:0}
+.lwbd-dl dt{font-weight:600; color:var(--ink-2); font-size:13px}
+.lwbd-dl dd{margin:0; font-weight:800; white-space:nowrap}
+.lwbd-health small{white-space:normal}
+.lwbd-log{list-style:none; margin:8px 0 0; padding:0; font-size:12px; color:var(--ink-2)}
+.lwbd-log li{padding:6px 0; border-bottom:1px solid var(--line-soft); word-break:break-word}
+.lwbd-log time{display:inline-block; min-width:78px; color:var(--ink-3); font-weight:700}
 
 @media (max-width:1199px){ .lwbd-kpis{grid-template-columns:repeat(2,minmax(0,1fr))} .span-4,.span-8{grid-column:span 12} }
 @media (max-width:767px){

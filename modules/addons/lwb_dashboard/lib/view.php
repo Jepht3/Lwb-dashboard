@@ -158,8 +158,9 @@ function lwbd_empty($text)
     return '<p class="lwbd-empty">' . lwbd_e($text) . '</p>';
 }
 
-function lwbd_render(array $d, $modulelink)
+function lwbd_render(array $d, $modulelink, array $opt = [])
 {
+    $token = $opt['token'] ?? '';
     $m = $d['month'];
     $delta = $m['last_to_date'] > 0 ? round(($m['current'] - $m['last_to_date']) / $m['last_to_date'] * 100) : null;
     $deltaHtml = $delta === null ? 'Rien à la même date le mois dernier'
@@ -205,17 +206,20 @@ function lwbd_render(array $d, $modulelink)
     }
     $topUnpaid = '';
     foreach ($u['top'] as $inv) {
-        $topUnpaid .= '<tr><td><a href="invoices.php?action=edit&id=' . $inv['id'] . '">n°&nbsp;' . lwbd_e($inv['num']) . '</a></td>'
-            . '<td><a href="clientssummary.php?userid=' . $inv['userid'] . '">' . lwbd_e($inv['client']) . '</a></td>'
-            . '<td>' . ($inv['late'] > 0 ? lwbd_badge($inv['late'] > 90 ? 'critical' : ($inv['late'] > 30 ? 'serious' : 'warning'), $inv['late'] . ' j de retard') : lwbd_badge('info', 'Échéance ' . lwbd_date($inv['due']))) . '</td>'
-            . '<td class="num"><b>' . lwbd_e(lwbd_money($inv['balance'])) . '</b></td></tr>';
+        $badge = $inv['late'] > 0 ? lwbd_badge($inv['late'] > 90 ? 'critical' : ($inv['late'] > 30 ? 'serious' : 'warning'), $inv['late'] . ' j de retard') : lwbd_badge('info', 'Échéance ' . lwbd_date($inv['due']));
+        $topUnpaid .= '<tr><td><a href="invoices.php?action=edit&id=' . $inv['id'] . '"><b>n°&nbsp;' . lwbd_e($inv['num']) . '</b></a>'
+            . '<small><a href="clientssummary.php?userid=' . $inv['userid'] . '">' . lwbd_e($inv['client']) . '</a></small><div class="lwbd-cellbadge">' . $badge . '</div></td>'
+            . '<td class="num"><b>' . lwbd_e(lwbd_money($inv['balance'])) . '</b>'
+            . '<form method="post" action="' . lwbd_e($modulelink) . '" class="lwbd-inline" onsubmit="return confirm(\'Envoyer une relance pour la facture n° ' . lwbd_e($inv['num']) . ' ?\')">'
+            . $token . '<input type="hidden" name="lwbd_action" value="remind"><input type="hidden" name="invoice" value="' . $inv['id'] . '">'
+            . '<button type="submit" class="lwbd-mini-btn" title="Envoyer un e-mail de relance">Relancer</button></form></td></tr>';
     }
     $unpaidCard = lwbd_hbars($aging)
-        . ($topUnpaid ? '<h3 class="lwbd-sub">Plus gros soldes</h3><div class="lwbd-scroll"><table class="lwbd-table">' . $topUnpaid . '</table></div>' : '');
+        . ($topUnpaid ? '<h3 class="lwbd-sub">Plus gros soldes</h3><div class="lwbd-scroll"><table class="lwbd-table" id="lwbd-t-unpaid" data-name="impayes"><thead><tr><th>Facture · client</th><th class="num">Solde</th></tr></thead><tbody>' . $topUnpaid . '</tbody></table></div>' : '');
 
     // Renouvellements
     $ren = '';
-    foreach (array_slice($d['renewals'], 0, 14) as $x) {
+    foreach ($d['renewals'] as $ri => $x) {
         $href = $x['kind'] === 'domain' ? 'clientsdomains.php?userid=' . $x['userid'] . '&id=' . $x['id'] : 'clientsservices.php?userid=' . $x['userid'] . '&id=' . $x['id'];
         $inv = $x['invoice'];
         $st = !$inv ? lwbd_badge('neutral', 'Pas encore facturé') : ($inv['status'] === 'Paid' ? lwbd_badge('good', 'Payé') : ($inv['status'] === 'Unpaid' ? lwbd_badge('warning', 'Facture impayée') : lwbd_badge('neutral', $inv['status'])));
@@ -223,13 +227,13 @@ function lwbd_render(array $d, $modulelink)
             $st = '<a href="invoices.php?action=edit&id=' . $inv['id'] . '">' . $st . '</a>';
         }
         $days = lwbd_days_between($d['today'], $x['due']);
-        $ren .= '<tr><td class="nowrap"><b>' . lwbd_e(lwbd_date($x['due'])) . '</b><small>' . ($days === 0 ? "aujourd'hui" : 'dans ' . $days . ' j') . '</small></td>'
+        $ren .= '<tr' . ($ri >= 14 ? ' class="lwbd-extra" hidden' : '') . '><td class="nowrap"><b>' . lwbd_e(lwbd_date($x['due'])) . '</b><small>' . ($days === 0 ? "aujourd'hui" : 'dans ' . $days . ' j') . '</small></td>'
             . '<td><a href="' . $href . '">' . lwbd_e($x['label']) . '</a><small><a href="clientssummary.php?userid=' . $x['userid'] . '">' . lwbd_e($x['client']) . '</a></small></td>'
             . '<td>' . $st . '</td><td class="num">' . lwbd_e(lwbd_money($x['amount'])) . '</td></tr>';
     }
     $renCount = count($d['renewals']);
-    $renewals = $ren ? '<div class="lwbd-scroll"><table class="lwbd-table"><thead><tr><th>Échéance</th><th>Service · client</th><th>Facture</th><th class="num">Montant</th></tr></thead><tbody>' . $ren . '</tbody></table></div>'
-        . ($renCount > 14 ? '<p class="lwbd-more">+ ' . ($renCount - 14) . ' autre(s) échéance(s) dans les 30 jours</p>' : '')
+    $renewals = $ren ? '<div class="lwbd-scroll"><table class="lwbd-table" id="lwbd-t-renew" data-name="renouvellements"><thead><tr><th>Échéance</th><th>Service · client</th><th>Facture</th><th class="num">Montant</th></tr></thead><tbody>' . $ren . '</tbody></table></div>'
+        . ($renCount > 14 ? '<button type="button" class="lwbd-more lwbd-showmore" data-target="lwbd-t-renew">Afficher les ' . ($renCount - 14) . ' autre(s) échéance(s)</button>' : '')
         : lwbd_empty('Aucun renouvellement dans les 30 prochains jours.');
 
     // Domaines à surveiller
@@ -239,7 +243,7 @@ function lwbd_render(array $d, $modulelink)
             . '<small><a href="clientssummary.php?userid=' . $x['userid'] . '">' . lwbd_e($x['client']) . '</a>' . ($x['expiry'] ? ' · expire le ' . lwbd_e(lwbd_date($x['expiry'])) : '') . '</small></div>'
             . lwbd_badge($x['level'], $x['reason']) . '</li>';
     }
-    $risks = $risk ? '<ul class="lwbd-list">' . $risk . '</ul>' . (count($d['domain_risks']) > 10 ? '<p class="lwbd-more">+ ' . (count($d['domain_risks']) - 10) . ' autre(s)</p>' : '')
+    $risks = $risk ? '<ul class="lwbd-list" id="lwbd-t-risks" data-name="domaines-a-surveiller">' . $risk . '</ul>' . (count($d['domain_risks']) > 10 ? '<p class="lwbd-more">+ ' . (count($d['domain_risks']) - 10) . ' autre(s)</p>' : '')
         : lwbd_empty('Aucun domaine à risque.');
 
     // Catégories et moyens de paiement
@@ -291,16 +295,33 @@ function lwbd_render(array $d, $modulelink)
         . '<a class="lwbd-btn primary" href="invoices.php?action=createinvoice">+ Facture</a>'
         . '<a class="lwbd-btn" href="ordersadd.php">+ Commande</a>'
         . '<a class="lwbd-btn" href="clientsadd.php">+ Client</a>'
-        . '<a class="lwbd-btn" href="supporttickets.php?action=open">+ Ticket</a></div>';
+        . '<a class="lwbd-btn" href="supporttickets.php?action=open">+ Ticket</a>'
+        . '<a class="lwbd-btn ghost" href="configaddonmods.php#lwb_dashboard" title="Objectif, période, page d\'accueil">Réglages</a></div>';
+
+    $flash = '';
+    if (!empty($opt['flash'])) {
+        [$type, $msg] = $opt['flash'];
+        $level = ['success' => 'good', 'warning' => 'warning', 'danger' => 'critical'][$type] ?? 'info';
+        $flash = '<div class="lwbd-flash lwbd-' . $level . '" role="status">' . lwbd_e($msg) . '</div>';
+    }
+
+    $goalCard = isset($opt['forecast']) ? lwbd_card('Objectif de ' . lwbd_month_label(date('Y-m'), true), lwbd_goal_html($opt['forecast'], $d), '', 'span-4') : '';
+    $healthCard = isset($opt['health']) ? lwbd_card('Santé du système', lwbd_health_html($opt['health']), '', 'span-6') : '';
+    $exp = function ($id) {
+        return '<button type="button" class="lwbd-export" data-export="' . $id . '" title="Télécharger en CSV (Excel)">CSV</button>';
+    };
 
     $html = '<div class="lwbd" id="lwbd">'
-        . '<div class="lwbd-head"><div><p class="lwbd-eyebrow">LEWEBMAX · ' . lwbd_e(lwbd_date($d['today'])) . '</p><h1>Tableau de bord</h1></div>' . $actions . '</div>'
+        . '<div class="lwbd-head"><div><p class="lwbd-eyebrow">LEWEBMAX · ' . lwbd_e(lwbd_date($d['today'])) . ' · <a href="index.php?lwbd=classic">Accueil WHMCS classique</a></p><h1>Tableau de bord</h1></div>' . $actions . '</div>'
+        . $flash
         . $kpis
         . '<div class="lwbd-grid">'
-        . lwbd_card('Encaissements nets par mois', $revenue, $chips, 'span-8')
-        . lwbd_card('Impayés par ancienneté', $unpaidCard, '<a class="lwbd-link" href="invoices.php?status=Unpaid">Toutes →</a>', 'span-4')
-        . lwbd_card('À renouveler dans les 30 jours', $renewals, '<span class="lwbd-count">' . $renCount . '</span>', 'span-8')
-        . lwbd_card('Domaines à surveiller', $risks, '<span class="lwbd-count">' . count($d['domain_risks']) . '</span>', 'span-4')
+        . lwbd_card('Encaissements nets par mois', $revenue, $chips, $goalCard ? 'span-8' : 'span-12')
+        . $goalCard
+        . lwbd_card('Impayés par ancienneté', $unpaidCard, '<span class="lwbd-tools">' . $exp('lwbd-t-unpaid') . '<a class="lwbd-link" href="invoices.php?status=Unpaid">Toutes →</a></span>', 'span-4')
+        . lwbd_card('À renouveler dans les 30 jours', $renewals, '<span class="lwbd-tools">' . ($ren ? $exp('lwbd-t-renew') : '') . '<span class="lwbd-count">' . $renCount . '</span></span>', 'span-8')
+        . lwbd_card('Domaines à surveiller', $risks, '<span class="lwbd-tools">' . ($risk ? $exp('lwbd-t-risks') : '') . '<span class="lwbd-count">' . count($d['domain_risks']) . '</span></span>', $healthCard ? 'span-6' : 'span-12')
+        . $healthCard
         . lwbd_card('Revenus par activité · ' . $d['months'] . ' mois', ($catRows ? lwbd_hbars($catRows) : lwbd_empty('Aucune facture payée sur la période.')) . $lateFees . $maint, '', 'span-6')
         . lwbd_card('Moyens de paiement · ' . $d['months'] . ' mois', $gwRows ? lwbd_hbars($gwRows) : lwbd_empty('Aucun paiement sur la période.'), '', 'span-6')
         . lwbd_card('Dernières commandes', $orders ? '<div class="lwbd-scroll"><table class="lwbd-table">' . $orders . '</table></div>' : lwbd_empty('Aucune commande.'), '<a class="lwbd-link" href="orders.php">Toutes →</a>', 'span-6')
@@ -310,6 +331,74 @@ function lwbd_render(array $d, $modulelink)
         . '</div><div class="lwbd-tip" role="tooltip" hidden></div></div>';
 
     return lwbd_style() . $html . lwbd_script();
+}
+
+/** Carte « Objectif du mois » : progression, projection et encaissements attendus. */
+function lwbd_goal_html(array $f, array $d)
+{
+    $html = '';
+    if ($f['goal'] > 0) {
+        $pct = (int) $f['pct'];
+        $level = $pct >= 100 ? 'good' : ($f['pace'] >= $f['goal'] ? 'info' : 'warning');
+        $html .= '<div class="lwbd-goal"><div class="lwbd-goal-top"><span class="lwbd-goal-pct">' . $pct . '&nbsp;%</span>'
+            . '<span>' . lwbd_e(lwbd_money($f['current'])) . ' sur ' . lwbd_e(lwbd_money($f['goal'], 0)) . '</span></div>'
+            . '<div class="lwbd-htrack lwbd-goal-track" role="progressbar" aria-valuenow="' . min(100, $pct) . '" aria-valuemin="0" aria-valuemax="100">'
+            . '<span class="lwbd-hfill lwbd-' . ($pct >= 100 ? 'good' : 'series') . '" style="width:' . min(100, max(1.5, $pct)) . '%"></span></div>'
+            . '<p class="lwbd-goal-msg">' . ($pct >= 100 ? lwbd_badge('good', 'Objectif atteint')
+                : lwbd_badge($level, $f['pace'] >= $f['goal'] ? 'En bonne voie' : 'En dessous du rythme') . ' encore ' . lwbd_e(lwbd_money(max(0, $f['goal'] - $f['current']))) . ' en ' . $f['days_left'] . ' jour(s)')
+            . '</p></div>';
+    } else {
+        $html .= '<p class="lwbd-empty">Fixez un objectif mensuel dans les <a href="configaddonmods.php#lwb_dashboard">réglages</a> pour suivre votre progression.</p>';
+    }
+    $rows = [
+        ['Projection fin de mois (rythme actuel)', lwbd_money($f['pace'])],
+        ['Factures dues d\'ici la fin du mois', lwbd_money($f['due_this_month'])],
+        ['Renouvellements à encaisser sous 30 jours', lwbd_money($f['expected_30'])],
+        ['Revenu récurrent annuel', lwbd_money($d['mrr'] * 12, 0)],
+    ];
+    $html .= '<dl class="lwbd-dl">';
+    foreach ($rows as $r) {
+        $html .= '<div><dt>' . lwbd_e($r[0]) . '</dt><dd>' . lwbd_e($r[1]) . '</dd></div>';
+    }
+    return $html . '</dl>';
+}
+
+/** Carte « Santé du système » : cron, registraire, erreurs, résiliations. */
+function lwbd_health_html(array $h)
+{
+    $items = [];
+    $items[] = [$h['cron']['ok'] ? 'good' : 'critical', 'Cron WHMCS', $h['cron']['ok'] ? 'Dernier passage ' . lwbd_ago($h['cron']['minutes']) : 'Dernier passage ' . lwbd_ago($h['cron']['minutes']) . ' : relances et renouvellements à l\'arrêt', 'systemhealthandupdates.php'];
+    $items[] = [$h['daily']['ok'] ? 'good' : 'critical', 'Tâches quotidiennes', 'Dernière exécution ' . lwbd_ago($h['daily']['minutes']), 'automationstatus.php'];
+    if ($h['registrar']['no_credit']) {
+        $items[] = ['critical', 'Crédit du registraire épuisé', 'Porkbun refuse les enregistrements et renouvellements faute de crédit. Rechargez le compte Porkbun.', 'https://porkbun.com/account/credit'];
+    }
+    $items[] = [$h['registrar']['count'] ? 'serious' : 'good', 'Opérations de domaines',
+        $h['registrar']['count'] ? $h['registrar']['count'] . ' échec(s) d\'enregistrement ou de renouvellement sur 7 jours' : 'Aucun échec sur 7 jours', 'systemactivitylog.php'];
+    $items[] = [$h['errors_count'] ? 'warning' : 'good', 'Erreurs techniques', $h['errors_count'] ? $h['errors_count'] . ' erreur(s) distincte(s) sur 7 jours' : 'Aucune erreur sur 7 jours', 'systemactivitylog.php'];
+    if ($h['paid_pending']) {
+        $items[] = ['warning', 'Services payés non activés', count($h['paid_pending']) . ' service(s) payé(s) toujours « En attente »', 'clientshostinglist.php?status=Pending'];
+    }
+    if ($h['cancels']) {
+        $items[] = ['warning', 'Demandes de résiliation', count($h['cancels']) . ' demande(s) sur des services encore actifs', 'cancelrequests.php'];
+    }
+    $html = '<ul class="lwbd-list lwbd-health">';
+    foreach ($items as [$level, $title, $text, $href]) {
+        $ext = strpos($href, 'http') === 0 ? ' target="_blank" rel="noopener"' : '';
+        $html .= '<li><div><a href="' . lwbd_e($href) . '"' . $ext . '><b>' . lwbd_e($title) . '</b></a><small>' . lwbd_e($text) . '</small></div>'
+            . lwbd_badge($level, ['good' => 'OK', 'warning' => 'À vérifier', 'serious' => 'Attention', 'critical' => 'Urgent'][$level]) . '</li>';
+    }
+    $html .= '</ul>';
+    $logs = array_merge(array_map(function ($r) {
+        return $r + ['count' => 1];
+    }, $h['registrar']['last']), $h['errors']);
+    if ($logs) {
+        $html .= '<details class="lwbd-data"><summary>Derniers messages du journal</summary><ul class="lwbd-log">';
+        foreach (array_slice($logs, 0, 8) as $l) {
+            $html .= '<li><time>' . lwbd_e(date('d/m H:i', strtotime($l['date']))) . '</time>' . lwbd_e($l['text']) . ($l['count'] > 1 ? ' <b>×' . $l['count'] . '</b>' : '') . '</li>';
+        }
+        $html .= '</ul></details>';
+    }
+    return $html . '<p class="lwbd-note">' . $h['emails_today'] . ' e-mail(s) envoyé(s) aujourd\'hui.</p>';
 }
 
 function lwbd_style()
