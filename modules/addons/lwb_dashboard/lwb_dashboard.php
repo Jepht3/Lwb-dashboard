@@ -26,7 +26,7 @@ function lwb_dashboard_config()
     return [
         'name' => 'Lwb-dashboard',
         'description' => 'Tableau de bord LEWEBMAX : encaissements, revenu récurrent, impayés, renouvellements, domaines à risque, commandes et tickets sur une seule page.',
-        'version' => '1.3',
+        'version' => '1.3.1',
         'author' => 'LEWEBMAX',
         // Les réglages se font sur la page « Réglages » du tableau de bord, dans le même design.
         'fields' => [],

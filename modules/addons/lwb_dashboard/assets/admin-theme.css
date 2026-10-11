@@ -3,7 +3,7 @@
  * Tout est limité à html.lwba : en retirant la classe, on retrouve Blend tel quel.
  */
 html.lwba{
-  --a-rail:248px; --a-top:64px;
+  --a-rail:232px; --a-side:208px; --a-top:64px;
   --a-ink:#0d0d2b; --a-ink2:#575b78; --a-ink3:#8a8ea8;
   --a-brand:#030673; --a-brand2:#1a1d8f; --a-brand50:#eef0fb; --a-accent:#ff6a3d;
   --a-page:#f4f6fb; --a-surface:#fff; --a-line:#e6e9f2; --a-line2:#eef1f7;
@@ -54,9 +54,15 @@ html.lwba .navigation .navbar-collapse > ul > li.bt:first-child > a:hover{filter
 html.lwba .lwba-railfoot{margin-top:auto; padding:14px 10px 4px; color:rgba(255,255,255,.4); font-size:11px; line-height:1.5}
 html.lwba .lwba-railfoot a{color:rgba(255,255,255,.55)!important}
 
+/* Entrée « Configuration » ajoutée au rail */
+html.lwba .navigation .lwba-rail-setup{margin-top:10px!important; padding-top:10px!important; border-top:1px solid rgba(255,255,255,.08)!important}
+
 /* ---------- Barre du haut (recherche + icônes) ---------- */
 html.lwba .lwba-topbar{position:fixed; top:0; left:var(--a-rail); right:0; z-index:1030; height:var(--a-top); display:flex; align-items:center; gap:16px; padding:0 22px; background:rgba(255,255,255,.92); backdrop-filter:saturate(1.4) blur(10px); border-bottom:1px solid var(--a-line)}
 html.lwba .lwba-burger{display:none; width:40px; height:40px; border:1px solid var(--a-line); border-radius:10px; background:#fff; color:var(--a-ink); align-items:center; justify-content:center; font-size:16px; cursor:pointer}
+html.lwba .lwba-sidetoggle{display:inline-flex; width:38px; height:38px; flex:none; border:1px solid var(--a-line); border-radius:10px; background:#fff; color:var(--a-ink2); align-items:center; justify-content:center; font-size:14px; cursor:pointer}
+html.lwba .lwba-sidetoggle:hover{color:var(--a-brand); border-color:#c9cee3}
+html.lwba.lwba-nosidebar .lwba-sidetoggle{display:none}
 html.lwba .lwba-pagetitle{font-weight:800; font-size:15px; color:var(--a-ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:30vw}
 html.lwba .lwba-topbar #intelliSearchForm{flex:1 1 auto!important; position:relative!important; top:auto!important; right:auto!important; left:auto!important; flex:1; max-width:520px; margin:0 auto 0 0!important; display:block!important; width:auto!important; height:auto!important; background:none!important; padding:0!important; box-shadow:none!important; transform:none!important}
 html.lwba .lwba-topbar #intelliSearchForm form{position:relative; margin:0}
@@ -81,7 +87,7 @@ html.lwba .lwba-topbar ul.right-nav ul.drop-icons li a{flex-direction:column; ju
 html.lwba .lwba-topbar ul.right-nav ul.drop-icons li a i{font-size:18px; color:var(--a-brand)}
 
 /* ---------- Menu contextuel (ancienne colonne de gauche) ---------- */
-html.lwba #sidebar{position:fixed!important; top:var(--a-top); left:var(--a-rail); bottom:0; width:220px!important; float:none!important; margin:0!important; padding:16px 12px 24px!important; overflow-y:auto; background:#fbfcfe!important; border-right:1px solid var(--a-line); z-index:20; scrollbar-width:thin}
+html.lwba #sidebar{position:fixed!important; top:var(--a-top); left:var(--a-rail); bottom:0; width:var(--a-side)!important; float:none!important; margin:0!important; padding:16px 12px 24px!important; overflow-y:auto; background:#fbfcfe!important; border-right:1px solid var(--a-line); z-index:20; scrollbar-width:thin}
 html.lwba #sidebar .sidebar-header{display:flex; align-items:center; gap:8px; margin:18px 8px 6px!important; padding:0!important; background:none!important; border:0!important; color:var(--a-ink3)!important; font-size:10.5px!important; font-weight:800!important; letter-spacing:.12em; text-transform:uppercase; height:auto!important; line-height:1.3!important}
 html.lwba #sidebar .sidebar-header:first-of-type{margin-top:4px!important}
 html.lwba #sidebar .sidebar-header i{color:var(--a-brand); font-size:12px; opacity:.8}
@@ -94,16 +100,16 @@ html.lwba #sidebar .content-padded{padding:4px 6px!important}
 html.lwba #sidebar .content-padded .form-control,html.lwba #sidebar select,html.lwba #sidebar input[type=text]{height:36px!important; font-size:12.5px!important; margin-bottom:6px}
 html.lwba #sidebar .btn-min-sidebar,html.lwba #sidebar .sidebar-collapse-expand{display:none!important}
 html.lwba #sidebarOpener{display:none!important}
-html.lwba.lwba-nosidebar #sidebar{display:none!important}
+html.lwba.lwba-nosidebar #sidebar,html.lwba.lwba-sidehidden #sidebar{display:none!important}
 
 /* ---------- Zone de contenu ---------- */
-html.lwba #contentarea{margin-left:220px!important; overflow-x:auto; padding:26px 30px 40px!important; background:transparent!important; min-height:calc(100vh - var(--a-top)); border:0!important; width:auto!important}
-html.lwba.lwba-nosidebar #contentarea{margin-left:0!important}
+html.lwba #contentarea{margin-left:var(--a-side)!important; overflow-x:auto; padding:24px 26px 40px!important; background:transparent!important; min-height:calc(100vh - var(--a-top)); border:0!important; width:auto!important}
+html.lwba.lwba-nosidebar #contentarea,html.lwba.lwba-sidehidden #contentarea{margin-left:0!important}
 html.lwba #contentarea > div > h1:first-child,html.lwba #contentarea h1{font-size:24px!important; font-weight:800!important; letter-spacing:-.01em; color:var(--a-ink)!important; margin:0 0 18px!important; padding:0!important; border:0!important}
 html.lwba #contentarea h2{font-size:18px!important; font-weight:800!important; color:var(--a-ink)!important}
 html.lwba #contentarea h3,html.lwba #contentarea h4{font-weight:700!important; color:var(--a-ink)!important}
-html.lwba .footerbar{margin-left:220px!important; padding:16px 30px!important; background:transparent!important; color:var(--a-ink3)!important; border-top:1px solid var(--a-line); font-size:12px; display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap}
-html.lwba.lwba-nosidebar .footerbar{margin-left:0!important}
+html.lwba .footerbar{margin-left:var(--a-side)!important; padding:16px 30px!important; background:transparent!important; color:var(--a-ink3)!important; border-top:1px solid var(--a-line); font-size:12px; display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap}
+html.lwba.lwba-nosidebar .footerbar,html.lwba.lwba-sidehidden .footerbar{margin-left:0!important}
 html.lwba .footerbar a{color:var(--a-ink2)!important}
 
 /* ---------- Cartes, panneaux, boîtes ---------- */
@@ -118,9 +124,9 @@ html.lwba .contentbox{background:#fff!important; border:1px solid var(--a-line)!
 /* ---------- Tableaux ---------- */
 html.lwba .tablebg{background:#fff!important; border:1px solid var(--a-line)!important; box-shadow:var(--a-shadow)!important; padding:0!important; overflow:auto}
 html.lwba table.datatable,html.lwba .tablebg table,html.lwba table.table{border-collapse:separate!important; border-spacing:0!important; width:100%; background:#fff!important; border:0!important; margin:0!important}
-html.lwba table.datatable th,html.lwba .tablebg table th,html.lwba table.table > thead > tr > th{background:#f8f9fc!important; color:var(--a-ink3)!important; font-size:11px!important; font-weight:800!important; text-transform:uppercase; letter-spacing:.06em; padding:11px 12px!important; border:0!important; border-bottom:1px solid var(--a-line)!important; white-space:nowrap; text-align:left}
+html.lwba table.datatable th,html.lwba .tablebg table th,html.lwba table.table > thead > tr > th{background:#f8f9fc!important; color:var(--a-ink3)!important; font-size:11px!important; font-weight:800!important; text-transform:uppercase; letter-spacing:.06em; padding:10px 10px!important; border:0!important; border-bottom:1px solid var(--a-line)!important; white-space:nowrap; text-align:left}
 html.lwba table.datatable th a,html.lwba .tablebg table th a{color:var(--a-ink3)!important}
-html.lwba table.datatable td,html.lwba .tablebg table td,html.lwba table.table > tbody > tr > td{padding:11px 12px!important; border:0!important; border-bottom:1px solid var(--a-line2)!important; color:var(--a-ink)!important; font-size:13px; vertical-align:middle!important; background:transparent!important}
+html.lwba table.datatable td,html.lwba .tablebg table td,html.lwba table.table > tbody > tr > td{padding:10px 10px!important; border:0!important; border-bottom:1px solid var(--a-line2)!important; color:var(--a-ink)!important; font-size:13px; vertical-align:middle!important; background:transparent!important}
 html.lwba table.datatable tr:last-child td,html.lwba .tablebg table tr:last-child td{border-bottom:0!important}
 html.lwba table.datatable tr:hover td,html.lwba .tablebg table tr:hover td,html.lwba table.table-hover > tbody > tr:hover > td{background:#fafbfe!important}
 html.lwba table.datatable tr.rowhighlight td,html.lwba .tablebg tr.rowhighlight td{background:#fff8ed!important}
@@ -193,6 +199,9 @@ html.lwba .dropdown-menu > li > a:hover{background:var(--a-page)!important; colo
 html.lwba .well{background:#fff!important; border:1px solid var(--a-line)!important; border-radius:14px!important; box-shadow:var(--a-shadow)!important}
 html.lwba hr{border-color:var(--a-line2)!important}
 
+/* Anciennes petites icônes de WHMCS : mises à l'échelle du thème */
+html.lwba #contentarea img[src*="images/icons/"],html.lwba #contentarea img[src*="/icons/"]{width:15px!important; height:15px!important; vertical-align:-3px; margin-right:5px; opacity:.9}
+
 /* ---------- Page d'accueil (widgets) et tuiles ---------- */
 html.lwba .home-widgets-container .widget,html.lwba .dashboard-panel{border-radius:16px!important}
 html.lwba .health-status-block{display:flex!important; align-items:center; gap:14px; padding:14px 16px!important; margin:6px 0!important; background:#fff!important; border:1px solid var(--a-line)!important; border-radius:14px!important; box-shadow:var(--a-shadow)!important; color:var(--a-ink)!important}
@@ -223,9 +232,13 @@ html.lwba .lwba-backdrop{display:none}
   html.lwba #sidebar{display:none!important}
   html.lwba #contentarea,html.lwba .footerbar{margin-left:0!important}
   html.lwba #contentarea{padding:18px 14px 30px!important}
-  html.lwba .lwba-pagetitle{display:none}
+  html.lwba .lwba-sidetoggle{display:inline-flex; width:38px; height:38px; flex:none; border:1px solid var(--a-line); border-radius:10px; background:#fff; color:var(--a-ink2); align-items:center; justify-content:center; font-size:14px; cursor:pointer}
+html.lwba .lwba-sidetoggle:hover{color:var(--a-brand); border-color:#c9cee3}
+html.lwba.lwba-nosidebar .lwba-sidetoggle{display:none}
+html.lwba .lwba-pagetitle{display:none}
   html.lwba .lwba-topbar{padding:0 12px; gap:8px}
   html.lwba .lwba-topbar ul.right-nav > li.bt:not(.account){display:none!important}
+  html.lwba .lwba-sidetoggle{display:none}
 }
 
 /* Tableau de bord Lwb-dashboard dans le thème : un peu plus de place pour les cartes étroites. */

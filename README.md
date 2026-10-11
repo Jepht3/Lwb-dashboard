@@ -16,10 +16,13 @@ Tableau de bord **et thème complet** pour l'administration de WHMCS 8, aux coul
 
 ![Page de connexion](docs/apercu-connexion.png)
 
-Le thème s'applique par-dessus le thème WHMCS d'origine (Blend), sans le modifier :
+Le thème s'applique par-dessus le thème WHMCS d'origine (Blend), sans le modifier. Il a été vérifié page par page sur les 239 pages de l'administration WHMCS 8.13 (menus, réglages, rapports, journaux, extensions) :
 
 - il se charge sur toutes les pages de l'administration ;
-- un interrupteur dans **Réglages › Thème de l'administration** le désactive instantanément.
+- un interrupteur dans **Réglages › Thème de l'administration** le désactive instantanément ;
+- le bouton à gauche du titre, dans la barre du haut, masque ou affiche le menu de la section, pour travailler en pleine largeur sur les grands tableaux.
+
+Trois écrans autonomes de WHMCS gardent leur propre design : WHMCS Connect, l'assistant « Getting started » et la page d'erreur.
 
 La page de connexion est habillée par une ligne ajoutée à `login.tpl`. WHMCS remplace ce fichier à chaque mise à jour, et l'extension remet la ligne automatiquement à la connexion suivante.
 
@@ -110,6 +113,7 @@ Les captures utilisent des données d'exemple.
 
 ## Historique
 
+- **1.3.1** : passe complète sur les 239 pages de l'administration ; menus latéraux plus fins, bouton pour masquer le menu de la section (mémorisé), entrée « Configuration » dans le menu, anciennes icônes WHMCS harmonisées, page de connexion ajustée sur mobile.
 - **1.3** : thème Lwb-admin pour toute l'administration et la page de connexion, activable dans les Réglages.
 - **1.2** : nouvelle page Réglages dans le design du tableau de bord (interrupteurs, choix de la période, sections à afficher). Les champs de l'ancienne page de configuration WHMCS sont supprimés.
 - **1.1** :

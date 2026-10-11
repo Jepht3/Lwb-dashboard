@@ -30,7 +30,9 @@
     // Barre du haut : bouton menu, titre, recherche, icônes.
     var top = document.createElement('div');
     top.className = 'lwba-topbar';
-    top.innerHTML = '<button type="button" class="lwba-burger" aria-label="Menu"><i class="fas fa-bars"></i></button><div class="lwba-pagetitle"></div>';
+    top.innerHTML = '<button type="button" class="lwba-burger" aria-label="Menu"><i class="fas fa-bars"></i></button>'
+        + '<button type="button" class="lwba-sidetoggle" title="Afficher ou masquer le menu de la section" aria-label="Menu de la section"><i class="fas fa-columns"></i></button>'
+        + '<div class="lwba-pagetitle"></div>';
     document.body.appendChild(top);
     var h1 = $('#contentarea h1');
     $('.lwba-pagetitle', top).textContent = h1 ? h1.textContent.trim() : document.title.replace(/^WHMCS\s*-\s*/, '');
@@ -46,7 +48,29 @@
     }
     var back = document.createElement('div'); back.className = 'lwba-backdrop'; document.body.appendChild(back);
     $('.lwba-burger', top).addEventListener('click', function () { html.classList.toggle('lwba-nav-open'); });
+    // Menu de la section masquable, mémorisé d'une page à l'autre (pour les grands tableaux).
+    var store = { get: function () { try { return localStorage.getItem('lwbaSide'); } catch (e) { return null; } },
+        set: function (v) { try { localStorage.setItem('lwbaSide', v); } catch (e) {} } };
+    if (store.get() === 'hidden') { html.classList.add('lwba-sidehidden'); }
+    $('.lwba-sidetoggle', top).addEventListener('click', function () {
+        html.classList.toggle('lwba-sidehidden');
+        store.set(html.classList.contains('lwba-sidehidden') ? 'hidden' : 'shown');
+    });
     back.addEventListener('click', function () { html.classList.remove('lwba-nav-open'); });
+
+    // Entrée « Configuration » dans le rail (les réglages WHMCS n'y figuraient pas).
+    var wrench = right ? $$('a', right).filter(function (a) { return /fa-wrench/.test(a.innerHTML); })[0] : null;
+    var mainUl = $('.navbar-collapse > ul:not(.right-nav)', nav);
+    if (wrench && mainUl) {
+        var li = document.createElement('li');
+        li.className = 'lwba-rail-setup';
+        li.innerHTML = '<a href="' + wrench.getAttribute('href') + '"><i class="fas fa-cog"></i>Configuration</a>';
+        mainUl.appendChild(li);
+        var page = location.pathname.split('/').pop();
+        if (/^config|^systemadmin|^systemhealth/.test(page) || /rp=\/[^/]+\/setup/.test(location.search)) {
+            li.classList.add('lwba-current');
+        }
+    }
 
     // Pied du rail.
     var foot = document.createElement('div');
