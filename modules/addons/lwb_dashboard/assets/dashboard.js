@@ -76,3 +76,15 @@
     });
     root.addEventListener('focusout', hide);
 })();
+// Bouton « Copier le lien » quand le thème de l'administration est désactivé
+// (sinon admin-tools.js s'en charge sur toutes les pages).
+(function () {
+    if (document.documentElement.classList.contains('lwba')) { return; }
+    document.addEventListener('click', function (e) {
+        var b = e.target.closest('#lwbd [data-copy]');
+        if (!b) { return; }
+        var t = document.createElement('textarea'); t.value = b.getAttribute('data-copy'); document.body.appendChild(t); t.select();
+        try { document.execCommand('copy'); b.textContent = 'Copié'; } catch (err) {}
+        t.remove();
+    });
+})();

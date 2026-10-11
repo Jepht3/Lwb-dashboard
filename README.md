@@ -12,6 +12,54 @@ Tableau de bord **et thème complet** pour l'administration de WHMCS 8, aux coul
 
 ![Aperçu sur ordinateur](docs/apercu-bureau.png)
 
+## Outils de travail (1.4)
+
+### File « À faire »
+
+Tout ce qui attend une action, au même endroit : menu latéral › « À faire », avec un compteur.
+
+| Groupe | Actions |
+|---|---|
+| Urgences système (cron arrêté, crédit du registraire épuisé) | Ouvrir |
+| Commandes à valider | **Accepter** (lance l'activation), Ouvrir |
+| Services payés non activés | **Activer**, Ouvrir |
+| Tickets à répondre | **Répondre** |
+| Factures dues sous 3 jours ou en retard depuis moins de 30 jours | **Relancer par e-mail**, **WhatsApp** (message prêt avec le lien de paiement Mobile Money), **Copier le lien**, Ouvrir |
+| Domaines en danger (grâce, rédemption, payés non renouvelés) | **Prévenir le client**, Ouvrir |
+| Actions de modules en échec, demandes de résiliation | Ouvrir |
+
+Chaque élément peut être **reporté** à demain ou de 7 jours. Toutes les actions demandent une confirmation et sont protégées par le jeton de sécurité de WHMCS.
+
+### Centre de notifications
+
+Une cloche dans la barre du haut, avec le nombre de nouveautés, liste les événements des 7 derniers jours :
+
+- nouvelles commandes et paiements reçus ;
+- nouveaux tickets et réponses de clients ;
+- échecs chez le registraire, erreurs de modules et résiliations.
+
+Les urgences en cours (cron arrêté, crédit épuisé) restent en tête. La liste se met à jour toutes les minutes. Le « lu / non lu » est gardé dans le navigateur.
+
+### Listes intelligentes
+
+Sur les listes de factures, commandes, clients, services, domaines et tickets :
+
+- **filtres en un clic**, par exemple : Impayées, En retard, À valider, Réponse client ;
+- **recherches enregistrées** : remplissez « Chercher/Filtrer », puis cliquez sur « Enregistrer la recherche » ;
+- **choix des colonnes**, mémorisé pour chaque liste ;
+- **en-tête qui reste visible** pendant le défilement ;
+- **barre de sélection** qui reprend les actions groupées de WHMCS : marquer payée, relancer, accepter, fermer, etc.
+
+### Actions mobiles et WhatsApp
+
+Sur téléphone, une barre d'actions en bas de l'écran :
+
+- **commande** : Accepter, Client ;
+- **ticket** : Répondre, Envoyer ;
+- **facture impayée** : WhatsApp, Copier le lien, Paiement reçu.
+
+Sur ordinateur, un bouton WhatsApp apparaît à côté du lien de paiement FlexPay de la facture.
+
 ## Thème de l'administration (Lwb-admin)
 
 ![Page de connexion](docs/apercu-connexion.png)
@@ -100,7 +148,9 @@ modules/addons/lwb_dashboard/
 ├── hooks.php           widget de l'accueil, redirection vers le tableau de bord
 ├── lib/data.php        calcul des chiffres (requêtes en lecture seule)
 ├── lib/health.php      santé du système, objectif et prévisions
-├── lib/actions.php     bouton « Relancer » et enregistrement des réglages (jeton CSRF WHMCS)
+├── lib/actions.php     actions (relance, réglages, file « À faire ») avec jeton CSRF WHMCS
+├── lib/todo.php        file « À faire », liens WhatsApp et de paiement
+├── lib/notify.php      centre de notifications
 ├── lib/view.php        affichage HTML et graphiques SVG
 └── assets/             styles et info-bulles
 ```
@@ -113,6 +163,7 @@ Les captures utilisent des données d'exemple.
 
 ## Historique
 
+- **1.4** : file « À faire » avec actions en un clic, centre de notifications, listes intelligentes (filtres, recherches enregistrées, colonnes, en-tête fixe, barre de sélection), actions mobiles et WhatsApp ; correction du bouton « + Facture » (jeton de sécurité manquant).
 - **1.3.1** : passe complète sur les 239 pages de l'administration ; menus latéraux plus fins, bouton pour masquer le menu de la section (mémorisé), entrée « Configuration » dans le menu, anciennes icônes WHMCS harmonisées, page de connexion ajustée sur mobile.
 - **1.3** : thème Lwb-admin pour toute l'administration et la page de connexion, activable dans les Réglages.
 - **1.2** : nouvelle page Réglages dans le design du tableau de bord (interrupteurs, choix de la période, sections à afficher). Les champs de l'ancienne page de configuration WHMCS sont supprimés.

@@ -10,8 +10,67 @@ if (!defined('WHMCS')) {
 require_once __DIR__ . '/lib/data.php';
 require_once __DIR__ . '/lib/health.php';
 require_once __DIR__ . '/lib/view.php';
+require_once __DIR__ . '/lib/todo.php';
+require_once __DIR__ . '/lib/notify.php';
 
 use WHMCS\Database\Capsule;
+
+/** L'administrateur connecté a-t-il accès à l'extension (rôles cochés dans WHMCS) ? */
+function lwbd_admin_allowed()
+{
+    $adminId = (int) ($_SESSION['adminid'] ?? 0);
+    if (!$adminId) {
+        return false;
+    }
+    $role = (int) Capsule::table('tbladmins')->where('id', $adminId)->value('roleid');
+    return in_array($role, array_map('intval', explode(',', lwbd_settings()['access'])), true);
+}
+
+/** Nombre d'éléments « À faire », gardé 60 s en session pour ne pas recalculer à chaque page. */
+function lwbd_todo_count_cached()
+{
+    $c = $_SESSION['lwbd_todo_cache'] ?? null;
+    if (!$c || $c['t'] < time() - 60) {
+        $c = ['t' => time(), 'n' => lwbd_todo_items(true)];
+        $_SESSION['lwbd_todo_cache'] = $c;
+    }
+    return (int) $c['n'];
+}
+
+/**
+ * Données pour le navigateur (JSON) : notifications et message WhatsApp d'une facture.
+ * addonmodules.php?module=lwb_dashboard&lwbd_ajax=notif | wa&invoice=ID
+ */
+add_hook('AdminAreaPage', 0, function ($vars) {
+    if (($vars['filename'] ?? '') !== 'addonmodules' || ($_GET['module'] ?? '') !== 'lwb_dashboard' || !isset($_GET['lwbd_ajax'])) {
+        return [];
+    }
+    while (ob_get_level() > 0) {
+        ob_end_clean();
+    }
+    header('Content-Type: application/json; charset=utf-8');
+    header('Cache-Control: no-store');
+    try {
+        if (!lwbd_admin_allowed()) {
+            http_response_code(403);
+            echo json_encode(['error' => 'forbidden']);
+            exit;
+        }
+        if ($_GET['lwbd_ajax'] === 'notif') {
+            echo json_encode(lwbd_notifications(), JSON_INVALID_UTF8_SUBSTITUTE);
+        } elseif ($_GET['lwbd_ajax'] === 'wa') {
+            $wa = lwbd_wa_invoice((int) ($_GET['invoice'] ?? 0));
+            echo json_encode($wa ? ['phone' => $wa['phone'], 'url' => $wa['url'], 'link' => $wa['link'], 'client' => $wa['client']] : ['error' => 'not_found'], JSON_INVALID_UTF8_SUBSTITUTE);
+        } else {
+            echo json_encode(['error' => 'unknown']);
+        }
+    } catch (\Throwable $e) {
+        http_response_code(500);
+        echo json_encode(['error' => 'server']);
+        logActivity('Lwb-dashboard (ajax) : ' . $e->getMessage());
+    }
+    exit;
+});
 
 /**
  * Tableau de bord comme page d'accueil de l'admin : redirige index.php sans
@@ -50,10 +109,15 @@ add_hook('AdminAreaHeadOutput', 1, function ($vars) {
             lwbd_login_patch(true);
             $_SESSION['lwbd_login_checked'] = 1;
         }
+        $allowed = lwbd_admin_allowed();
         $cfg = json_encode([
             'logo' => 'https://lewebmax.com/wp-content/uploads/2023/01/288x80-blanc.png',
             'dashboard' => 'addonmodules.php?module=lwb_dashboard',
             'addLabel' => 'Nouveau',
+            'tools' => $allowed,
+            'todoUrl' => 'addonmodules.php?module=lwb_dashboard&view=todo',
+            'todo' => $allowed ? lwbd_todo_count_cached() : 0,
+            'ajax' => 'addonmodules.php?module=lwb_dashboard&lwbd_ajax=',
         ], JSON_HEX_TAG | JSON_UNESCAPED_SLASHES);
         return '<script>document.documentElement.classList.add("lwba");window.LWBA=' . $cfg . ';</script>'
             . '<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">'
@@ -69,7 +133,8 @@ add_hook('AdminAreaFooterOutput', 1, function ($vars) {
             return '';
         }
         $base = rtrim((string) \WHMCS\Config\Setting::getValue('SystemURL'), '/') . '/modules/addons/lwb_dashboard/assets/';
-        return '<script src="' . $base . 'admin-theme.js?v=' . @filemtime(__DIR__ . '/assets/admin-theme.js') . '"></script>';
+        return '<script src="' . $base . 'admin-theme.js?v=' . @filemtime(__DIR__ . '/assets/admin-theme.js') . '"></script>'
+            . '<script src="' . $base . 'admin-tools.js?v=' . @filemtime(__DIR__ . '/assets/admin-tools.js') . '"></script>';
     } catch (\Throwable $e) {
         return '';
     }

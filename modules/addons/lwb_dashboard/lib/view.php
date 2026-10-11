@@ -48,6 +48,9 @@ function lwbd_icon($name)
         'chat' => '<path d="M4 5h16v11H8l-4 4z"/>',
         'up' => '<path d="M12 19V5M6 11l6-6 6 6"/>',
         'down' => '<path d="M12 5v14M6 13l6 6 6-6"/>',
+        'check' => '<path d="M20 6L9 17l-5-5"/>',
+        'bell' => '<path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/>',
+        'list' => '<path d="M9 6h12M9 12h12M9 18h12"/><path d="M4 6h.01M4 12h.01M4 18h.01"/>',
         'gear' => '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>',
         'back' => '<path d="M15 18l-6-6 6-6"/>',
         'brush' => '<path d="M9.5 14.5l-4 4a2.1 2.1 0 0 1-3-3l4-4"/><path d="M14 3l7 7-7.5 7.5-7-7z"/>',
@@ -299,7 +302,8 @@ function lwbd_render(array $d, $modulelink, array $opt = [])
     $lateFees = $d['late_fees'] > 0 ? '<p class="lwbd-note">Pénalités de retard encaissées sur la période&nbsp;: <b>' . lwbd_e(lwbd_money($d['late_fees'])) . '</b></p>' : '';
 
     $actions = '<div class="lwbd-actions">'
-        . '<a class="lwbd-btn primary" href="invoices.php?action=createinvoice">+ Facture</a>'
+        . '<a class="lwbd-btn todo" href="' . lwbd_e($modulelink . '&view=todo') . '">' . lwbd_icon('list') . 'À faire' . (isset($opt['todo_count']) && $opt['todo_count'] ? ' <b class="lwbd-pill">' . (int) $opt['todo_count'] . '</b>' : '') . '</a>'
+        . '<a class="lwbd-btn primary" href="invoices.php?action=createinvoice' . lwbd_e($opt['linktoken'] ?? '') . '">+ Facture</a>'
         . '<a class="lwbd-btn" href="ordersadd.php">+ Commande</a>'
         . '<a class="lwbd-btn" href="clientsadd.php">+ Client</a>'
         . '<a class="lwbd-btn" href="supporttickets.php?action=open">+ Ticket</a>'

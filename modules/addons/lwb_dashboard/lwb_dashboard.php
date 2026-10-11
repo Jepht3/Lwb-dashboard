@@ -19,6 +19,8 @@ if (!defined('WHMCS')) {
 require_once __DIR__ . '/lib/data.php';
 require_once __DIR__ . '/lib/health.php';
 require_once __DIR__ . '/lib/actions.php';
+require_once __DIR__ . '/lib/todo.php';
+require_once __DIR__ . '/lib/notify.php';
 require_once __DIR__ . '/lib/view.php';
 
 function lwb_dashboard_config()
@@ -26,7 +28,7 @@ function lwb_dashboard_config()
     return [
         'name' => 'Lwb-dashboard',
         'description' => 'Tableau de bord LEWEBMAX : encaissements, revenu récurrent, impayés, renouvellements, domaines à risque, commandes et tickets sur une seule page.',
-        'version' => '1.3.1',
+        'version' => '1.4',
         'author' => 'LEWEBMAX',
         // Les réglages se font sur la page « Réglages » du tableau de bord, dans le même design.
         'fields' => [],
@@ -35,6 +37,7 @@ function lwb_dashboard_config()
 
 function lwb_dashboard_upgrade($vars)
 {
+    lwbd_snooze_table();
     // Rien à migrer : les réglages existants (objectif, période, accueil) sont repris tels quels.
 }
 
@@ -54,6 +57,10 @@ function lwb_dashboard_output($vars)
         $flash = lwbd_handle_actions();
         $set = lwbd_settings();
         $token = function_exists('generate_token') ? generate_token('form') : '';
+        if (($_GET['view'] ?? '') === 'todo') {
+            echo lwbd_todo_render(lwbd_todo_items(), $vars['modulelink'], $token, $flash);
+            return;
+        }
         if (($_GET['view'] ?? '') === 'settings') {
             echo lwbd_settings_render($set, $vars['modulelink'], $token, $flash);
             return;
@@ -68,6 +75,8 @@ function lwb_dashboard_output($vars)
             'hidden' => $set['hidden'],
             'forecast' => $show('goal') ? lwbd_forecast($d, (float) $set['goal']) : null,
             'health' => $show('health') ? lwbd_health() : null,
+            'todo_count' => lwbd_todo_items(true),
+            'linktoken' => function_exists('generate_token') ? generate_token('link') : '',
         ]);
     } catch (\Throwable $e) {
         logActivity('Lwb-dashboard : ' . $e->getMessage());

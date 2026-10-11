@@ -2,9 +2,10 @@
 /**
  * Lwb-dashboard — actions depuis le tableau de bord (relance d'une facture).
  *
- * Deux actions écrivent, toujours sur demande de l'administrateur et avec le
- * jeton CSRF de WHMCS : l'envoi d'un e-mail de relance et l'enregistrement des
- * réglages du tableau de bord.
+ * Toutes les actions écrivent uniquement sur demande de l'administrateur, avec le
+ * jeton CSRF de WHMCS : relance d'une facture, réglages, et depuis la file
+ * « À faire » : accepter une commande, activer un service, prévenir le client
+ * d'un domaine en danger, reporter un élément.
  */
 
 use WHMCS\Database\Capsule;
@@ -28,7 +29,7 @@ function lwbd_reminder_template($late)
 function lwbd_handle_actions()
 {
     $action = ($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' ? ($_POST['lwbd_action'] ?? '') : '';
-    if (!in_array($action, ['remind', 'settings'], true)) {
+    if (!in_array($action, ['remind', 'settings', 'accept_order', 'activate_service', 'snooze', 'domain_notice'], true)) {
         return null;
     }
     if (function_exists('check_token')) {
@@ -36,6 +37,9 @@ function lwbd_handle_actions()
     }
     if ($action === 'settings') {
         return lwbd_save_settings($_POST);
+    }
+    if ($action !== 'remind') {
+        return lwbd_todo_action($action, $_POST);
     }
     $id = (int) ($_POST['invoice'] ?? 0);
     $inv = Capsule::table('tblinvoices')->where('id', $id)->where('status', 'Unpaid')->first(['id', 'invoicenum', 'duedate']);
@@ -84,4 +88,59 @@ function lwbd_save_settings(array $post)
     }
     logActivity('Lwb-dashboard : réglages enregistrés');
     return ['success', 'Réglages enregistrés.'];
+}
+
+/** Actions de la file « À faire ». Retourne [type, message]. */
+function lwbd_todo_action($action, array $post)
+{
+    if ($action === 'snooze') {
+        $item = substr(preg_replace('/[^a-z0-9:._-]/i', '', (string) ($post['item'] ?? '')), 0, 64);
+        $days = in_array((int) ($post['days'] ?? 1), [1, 7], true) ? (int) $post['days'] : 1;
+        if ($item === '') {
+            return ['danger', 'Élément inconnu.'];
+        }
+        lwbd_snooze_table();
+        Capsule::table(LWBD_SNOOZE_TABLE)->updateOrInsert(['item' => $item], ['until' => date('Y-m-d H:i:s', strtotime('+' . $days . ' days'))]);
+        return ['success', $days === 1 ? 'Reporté à demain.' : 'Reporté de 7 jours.'];
+    }
+    if ($action === 'accept_order') {
+        $id = (int) ($post['order'] ?? 0);
+        $order = Capsule::table('tblorders')->where('id', $id)->where('status', 'Pending')->first(['id', 'ordernum']);
+        if (!$order) {
+            return ['warning', 'Cette commande n\'est plus en attente.'];
+        }
+        $r = localAPI('AcceptOrder', ['orderid' => $id, 'autosetup' => true, 'sendemail' => true]);
+        if (($r['result'] ?? '') !== 'success') {
+            return ['danger', 'La commande n° ' . $order->ordernum . ' n\'a pas pu être acceptée : ' . ($r['message'] ?? 'erreur inconnue')];
+        }
+        logActivity('Lwb-dashboard : commande acceptée depuis « À faire » - Order ID: ' . $id);
+        return ['success', 'Commande n° ' . $order->ordernum . ' acceptée, services en cours d\'activation.'];
+    }
+    if ($action === 'activate_service') {
+        $id = (int) ($post['service'] ?? 0);
+        $svc = Capsule::table('tblhosting')->where('id', $id)->where('domainstatus', 'Pending')->first(['id', 'domain']);
+        if (!$svc) {
+            return ['warning', 'Ce service n\'est plus en attente.'];
+        }
+        $r = localAPI('ModuleCreate', ['serviceid' => $id]);
+        if (($r['result'] ?? '') !== 'success') {
+            return ['danger', 'Activation impossible : ' . ($r['message'] ?? 'erreur inconnue')];
+        }
+        logActivity('Lwb-dashboard : service activé depuis « À faire » - Service ID: ' . $id);
+        return ['success', 'Service ' . ($svc->domain ?: '#' . $id) . ' activé.'];
+    }
+    if ($action === 'domain_notice') {
+        $id = (int) ($post['domain'] ?? 0);
+        $dom = Capsule::table('tbldomains')->where('id', $id)->first(['id', 'domain']);
+        if (!$dom) {
+            return ['danger', 'Domaine introuvable.'];
+        }
+        $r = localAPI('SendEmail', ['messagename' => 'Upcoming Domain Renewal Notice', 'id' => $id]);
+        if (($r['result'] ?? '') !== 'success') {
+            return ['danger', 'Échec de l\'envoi : ' . ($r['message'] ?? 'erreur inconnue')];
+        }
+        logActivity('Lwb-dashboard : avis de renouvellement envoyé depuis « À faire » - Domain ID: ' . $id);
+        return ['success', 'Avis de renouvellement envoyé pour ' . $dom->domain . '.'];
+    }
+    return null;
 }
