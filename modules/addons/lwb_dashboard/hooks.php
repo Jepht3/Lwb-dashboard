@@ -37,6 +37,44 @@ add_hook('AdminAreaPage', 1, function ($vars) {
     }
 });
 
+/** Thème Lwb-admin : styles dans l'en-tête de chaque page de l'administration. */
+add_hook('AdminAreaHeadOutput', 1, function ($vars) {
+    try {
+        if (!lwbd_admin_theme_enabled()) {
+            return '';
+        }
+        $base = rtrim((string) \WHMCS\Config\Setting::getValue('SystemURL'), '/') . '/modules/addons/lwb_dashboard/assets/';
+        $v = @filemtime(__DIR__ . '/assets/admin-theme.css');
+        if (lwbd_settings()['admin_theme'] === 'on' && empty($_SESSION['lwbd_login_checked'])) {
+            // Après une mise à jour de WHMCS, login.tpl est remplacé : on remet la ligne du thème.
+            lwbd_login_patch(true);
+            $_SESSION['lwbd_login_checked'] = 1;
+        }
+        $cfg = json_encode([
+            'logo' => 'https://lewebmax.com/wp-content/uploads/2023/01/288x80-blanc.png',
+            'dashboard' => 'addonmodules.php?module=lwb_dashboard',
+            'addLabel' => 'Nouveau',
+        ], JSON_HEX_TAG | JSON_UNESCAPED_SLASHES);
+        return '<script>document.documentElement.classList.add("lwba");window.LWBA=' . $cfg . ';</script>'
+            . '<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">'
+            . '<link href="' . $base . 'admin-theme.css?v=' . $v . '" rel="stylesheet">';
+    } catch (\Throwable $e) {
+        return '';
+    }
+});
+
+add_hook('AdminAreaFooterOutput', 1, function ($vars) {
+    try {
+        if (!lwbd_admin_theme_enabled()) {
+            return '';
+        }
+        $base = rtrim((string) \WHMCS\Config\Setting::getValue('SystemURL'), '/') . '/modules/addons/lwb_dashboard/assets/';
+        return '<script src="' . $base . 'admin-theme.js?v=' . @filemtime(__DIR__ . '/assets/admin-theme.js') . '"></script>';
+    } catch (\Throwable $e) {
+        return '';
+    }
+});
+
 if (class_exists('\WHMCS\Module\AbstractWidget')) {
     class LwbDashboardWidget extends \WHMCS\Module\AbstractWidget
     {

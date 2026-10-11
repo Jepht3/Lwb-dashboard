@@ -50,6 +50,7 @@ function lwbd_icon($name)
         'down' => '<path d="M12 5v14M6 13l6 6 6-6"/>',
         'gear' => '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>',
         'back' => '<path d="M15 18l-6-6 6-6"/>',
+        'brush' => '<path d="M9.5 14.5l-4 4a2.1 2.1 0 0 1-3-3l4-4"/><path d="M14 3l7 7-7.5 7.5-7-7z"/>',
         'home' => '<path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/>',
         'eye' => '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
         'target' => '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/>',
@@ -484,6 +485,9 @@ function lwbd_settings_render(array $set, $modulelink, $token, $flash = null)
         . '<section class="lwbd-card"><header class="lwbd-set-h"><span class="lwbd-kpi-ic">' . lwbd_icon('home') . '</span><div><h2>Démarrage</h2><p>Ce que vous voyez en vous connectant à l\'administration.</p></div></header>'
         . lwbd_switch('homepage', $set['homepage'] === 'on', 'Ouvrir le tableau de bord après la connexion', 'À la place de l\'accueil WHMCS. Le lien « Accueil WHMCS classique » reste disponible en haut du tableau de bord.')
         . '<div class="lwbd-set-note">' . lwbd_icon('lock') . '<span>Les administrateurs autorisés à voir le tableau de bord se choisissent dans WHMCS, rubrique <a href="configaddonmods.php#lwb_dashboard">Modules complémentaires</a>.</span></div>'
+        . '</section>'
+        . '<section class="lwbd-card lwbd-set-wide"><header class="lwbd-set-h"><span class="lwbd-kpi-ic">' . lwbd_icon('brush') . '</span><div><h2>Thème de l\'administration</h2><p>Le design LEWEBMAX sur toutes les pages de WHMCS : menu latéral, barre de recherche, tableaux, formulaires et page de connexion.</p></div></header>'
+        . lwbd_switch('admin_theme', $set['admin_theme'] === 'on', 'Thème moderne LEWEBMAX pour toute l\'administration', 'Pour tous les administrateurs. Désactivez-le pour retrouver instantanément le thème WHMCS d\'origine.')
         . '</section>'
         . '<section class="lwbd-card lwbd-set-wide"><header class="lwbd-set-h"><span class="lwbd-kpi-ic">' . lwbd_icon('eye') . '</span><div><h2>Sections affichées</h2><p>Masquez ce dont vous n\'avez pas besoin. Le graphique des encaissements reste toujours affiché.</p></div>'
         . '<span class="lwbd-tools"><button type="button" class="lwbd-mini-btn" data-check="all">Tout afficher</button></span></header>'

@@ -76,6 +76,12 @@ function lwbd_save_settings(array $post)
     lwbd_save_setting('period', (string) $period);
     lwbd_save_setting('homepage', !empty($post['homepage']) ? 'on' : '');
     lwbd_save_setting('hidden', implode(',', $hidden));
+    $theme = !empty($post['admin_theme']) ? 'on' : '';
+    if ($theme !== lwbd_settings()['admin_theme']) {
+        lwbd_save_setting('admin_theme', $theme);
+        lwbd_login_patch($theme === 'on');
+        logActivity('Lwb-dashboard : thème moderne de l\'administration ' . ($theme === 'on' ? 'activé' : 'désactivé'));
+    }
     logActivity('Lwb-dashboard : réglages enregistrés');
     return ['success', 'Réglages enregistrés.'];
 }

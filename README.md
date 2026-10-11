@@ -1,10 +1,31 @@
 # Lwb-dashboard
 
-Tableau de bord d'administration pour WHMCS 8, aux couleurs de LEWEBMAX. Il réunit sur une seule page tout ce qu'il faut suivre au quotidien : argent encaissé, impayés, renouvellements, domaines à risque, commandes et tickets.
+Tableau de bord **et thème complet** pour l'administration de WHMCS 8, aux couleurs de LEWEBMAX.
+
+- **Le tableau de bord** réunit sur une seule page tout ce qu'il faut suivre au quotidien : argent encaissé, impayés, renouvellements, domaines à risque, commandes et tickets.
+- **Le thème « Lwb-admin »** modernise toute l'administration :
+  - menu latéral bleu nuit à icônes et barre de recherche en haut ;
+  - menus contextuels épurés ;
+  - tableaux, formulaires, onglets, boutons, statuts et fenêtres redessinés ;
+  - page de connexion à la marque LEWEBMAX ;
+  - version mobile avec menu coulissant.
 
 ![Aperçu sur ordinateur](docs/apercu-bureau.png)
 
-## Ce qu'il affiche
+## Thème de l'administration (Lwb-admin)
+
+![Page de connexion](docs/apercu-connexion.png)
+
+Le thème s'applique par-dessus le thème WHMCS d'origine (Blend), sans le modifier :
+
+- il se charge sur toutes les pages de l'administration ;
+- un interrupteur dans **Réglages › Thème de l'administration** le désactive instantanément.
+
+La page de connexion est habillée par une ligne ajoutée à `login.tpl`. WHMCS remplace ce fichier à chaque mise à jour, et l'extension remet la ligne automatiquement à la connexion suivante.
+
+La mention de copyright de WHMCS reste affichée, comme l'exige la licence.
+
+## Ce qu'affiche le tableau de bord
 
 - **8 indicateurs** :
   - encaissé ce mois, comparé à la même date le mois précédent ;
@@ -58,6 +79,7 @@ Le bouton **Réglages**, en haut du tableau de bord, ouvre une page dans le mêm
   - objectif d'encaissement mensuel ; laissez le champ vide pour masquer la jauge ;
   - période affichée à l'ouverture : 6, 12 ou 24 mois.
 - **Démarrage** : ouvre le tableau de bord après la connexion, à la place de l'accueil WHMCS. Le lien « Accueil WHMCS classique » reste disponible.
+- **Thème de l'administration** : active ou désactive le thème Lwb-admin pour tous les administrateurs.
 - **Sections affichées** : un interrupteur par carte pour masquer ce qui ne sert pas. Quand une carte est masquée, sa voisine prend toute la largeur.
 
 Les administrateurs autorisés se choisissent toujours dans WHMCS (Configuration › Modules complémentaires), comme pour toute extension.
@@ -88,6 +110,7 @@ Les captures utilisent des données d'exemple.
 
 ## Historique
 
+- **1.3** : thème Lwb-admin pour toute l'administration et la page de connexion, activable dans les Réglages.
 - **1.2** : nouvelle page Réglages dans le design du tableau de bord (interrupteurs, choix de la période, sections à afficher). Les champs de l'ancienne page de configuration WHMCS sont supprimés.
 - **1.1** :
   - réglages : objectif, période, page d'accueil ;

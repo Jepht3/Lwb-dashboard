@@ -1,0 +1,41 @@
+/* Lwb-admin : page de connexion de l'administration WHMCS aux couleurs de LEWEBMAX. */
+html body{min-height:100vh; margin:0; font-family:"Plus Jakarta Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif!important; color:#0d0d2b;
+  background:radial-gradient(1200px 600px at 85% -10%,rgba(255,106,61,.28),transparent 60%),radial-gradient(900px 600px at -10% 110%,rgba(80,96,255,.35),transparent 60%),linear-gradient(160deg,#05087d 0%,#030673 50%,#02044f 100%)!important;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:18px; padding:32px 16px!important}
+body *{font-family:inherit!important}
+.login-container{width:100%; max-width:430px!important; margin:0 auto!important; padding:0!important; margin-top:0!important}
+.login-container h1.logo{margin:0 0 26px!important; text-align:center}
+.login-container h1.logo img{content:url("https://lewebmax.com/wp-content/uploads/2023/01/288x80-blanc.png"); max-height:46px; width:auto; height:46px}
+.login-body{background:#fff!important; border:0!important; border-radius:22px 22px 0 0!important; padding:34px 34px 26px!important; box-shadow:0 30px 80px rgba(2,4,79,.45)!important}
+.login-body h2{font-size:26px!important; font-weight:800!important; letter-spacing:-.01em; text-transform:none!important; color:#0d0d2b!important; margin:0 0 6px!important}
+.login-body h2::after{content:"Espace d'administration LEWEBMAX"; display:block; margin-top:6px; font-size:13.5px; font-weight:500; color:#575b78; letter-spacing:0}
+.login-body form{margin-top:22px}
+.login-body .form-control,.login-body input[type=text],.login-body input[type=password],.login-body input[type=email]{height:50px!important; border:1px solid #e2e5f2!important; border-radius:12px!important; padding:0 16px!important; font-size:15px!important; color:#0d0d2b!important; background:#f8f9fc!important; box-shadow:none!important; transition:border-color .15s,box-shadow .15s,background .15s}
+.login-body .form-control:focus,.login-body input:focus{background:#fff!important; border-color:#030673!important; box-shadow:0 0 0 4px rgba(3,6,115,.10)!important; outline:0}
+.login-body .form-group{margin-bottom:14px!important}
+.login-body .checkbox label,.login-body label{color:#575b78!important; font-size:13.5px!important; font-weight:600}
+.login-body input[type=checkbox]{accent-color:#030673; width:16px; height:16px}
+.login-body .btn-primary,.login-body button[type=submit],.login-body input[type=submit]{height:50px!important; border:0!important; border-radius:12px!important; background:#030673!important; color:#fff!important; font-size:15px!important; font-weight:800!important; letter-spacing:.01em; box-shadow:0 10px 24px rgba(3,6,115,.28)!important; transition:transform .15s,box-shadow .15s,background .15s}
+.login-body .btn-primary:hover,.login-body button[type=submit]:hover{background:#1a1d8f!important; transform:translateY(-1px); box-shadow:0 14px 30px rgba(3,6,115,.32)!important}
+.login-body .alert{border-radius:12px!important; border:0!important; font-weight:600; font-size:13.5px}
+.login-body .alert-danger{background:#fdecec!important; color:#b42318!important}
+.login-body .alert-info{background:#eef0fb!important; color:#2f3c9e!important}
+.login-body .alert-success{background:#e7f6e7!important; color:#067a06!important}
+.login-body a{color:#030673!important; font-weight:700}
+.login-container .footer{background:#fff!important; border:0!important; border-radius:0 0 22px 22px!important; padding:0 34px 10px!important; min-height:0!important; height:auto!important; text-align:center; font-size:13px; }
+.login-container .footer a{color:#575b78!important; font-weight:600}
+.language-chooser{position:static!important; top:auto!important; right:auto!important; display:flex; justify-content:center; width:100%; max-width:430px}
+.language-chooser .pull-right{float:none!important}
+.language-chooser .dropdown-toggle,.language-chooser .btn-group > .btn{background:rgba(255,255,255,.1)!important; border:1px solid rgba(255,255,255,.22)!important; color:#fff!important; border-radius:999px!important; padding:8px 16px!important; font-weight:700; font-size:13px!important}
+.language-chooser .dropdown-menu{left:50%!important; right:auto!important; transform:translateX(-50%); border:0!important; border-radius:14px!important; box-shadow:0 20px 50px rgba(2,4,79,.4)!important; padding:6px!important; max-height:300px; overflow:auto}
+.language-chooser .dropdown-menu > li > a{border-radius:8px; padding:7px 12px!important}
+.poweredby{color:rgba(255,255,255,.55)!important; font-size:12px}
+.poweredby a{color:rgba(255,255,255,.75)!important}
+@media (max-width:480px){ .login-body{padding:26px 22px 20px!important} .login-container .footer{padding:12px 22px!important} }
+.login-body .row{display:flex; flex-direction:column; gap:10px; margin:0!important}
+.login-body .row > [class*=col-]{width:100%!important; float:none!important; padding:0!important}
+.login-body .checkbox{margin:2px 0 4px!important}
+
+.login-container .footer *{background:transparent!important}
+.login-body{box-shadow:0 30px 70px rgba(2,4,79,.40)!important}
+.login-container h1.logo{position:relative; top:-18px}

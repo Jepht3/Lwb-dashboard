@@ -323,10 +323,62 @@ function lwbd_settings()
         'homepage' => (string) ($rows['homepage'] ?? ''),
         'hidden' => array_values(array_filter(explode(',', (string) ($rows['hidden'] ?? '')))),
         'access' => (string) ($rows['access'] ?? ''),
+        'admin_theme' => (string) ($rows['admin_theme'] ?? ''),
     ];
 }
 
 function lwbd_save_setting($name, $value)
 {
     Capsule::table('tbladdonmodules')->updateOrInsert(['module' => 'lwb_dashboard', 'setting' => $name], ['value' => (string) $value]);
+}
+
+/**
+ * Thème Lwb-admin actif pour l'administrateur connecté ?
+ * Réglage « admin_theme » : 'on' pour tous ; sinon la liste « admin_theme_preview »
+ * (identifiants d'administrateurs) permet de l'essayer sans toucher aux autres.
+ */
+function lwbd_admin_theme_enabled()
+{
+    $rows = Capsule::table('tbladdonmodules')->where('module', 'lwb_dashboard')
+        ->whereIn('setting', ['admin_theme', 'admin_theme_preview'])->pluck('value', 'setting')->all();
+    if (($rows['admin_theme'] ?? '') === 'on') {
+        return true;
+    }
+    $adminId = (int) ($_SESSION['adminid'] ?? 0);
+    return $adminId && in_array($adminId, array_map('intval', explode(',', (string) ($rows['admin_theme_preview'] ?? ''))), true);
+}
+
+/** Chemin de login.tpl dans le dossier d'administration (renommé « kota » ici). */
+function lwbd_login_tpl_path()
+{
+    $dir = !empty($GLOBALS['customadminpath']) ? $GLOBALS['customadminpath'] : 'admin';
+    return ROOTDIR . '/' . trim($dir, '/') . '/templates/login.tpl';
+}
+
+/**
+ * Ajoute (ou retire) la ligne qui habille la page de connexion. WHMCS remplace
+ * login.tpl à chaque mise à jour : l'appel est refait automatiquement ensuite.
+ */
+function lwbd_login_patch($enable)
+{
+    $file = lwbd_login_tpl_path();
+    if (!is_file($file) || !is_writable($file)) {
+        return false;
+    }
+    $tpl = file_get_contents($file);
+    $marker = '<!-- lwb-admin-login -->';
+    $has = strpos($tpl, $marker) !== false;
+    if ($enable && !$has) {
+        $css = '../modules/addons/lwb_dashboard/assets/admin-login.css?v=' . @filemtime(__DIR__ . '/../assets/admin-login.css');
+        $line = $marker . '<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"><link href="' . $css . '" rel="stylesheet">';
+        $new = preg_replace('#(<link href="templates/login\.min\.css" rel="stylesheet">)#', "$1\n        " . $line, $tpl, 1, $count);
+        if (!$count) {
+            $new = preg_replace('#</head>#i', '    ' . $line . "\n</head>", $tpl, 1, $count);
+        }
+        return $count ? (bool) file_put_contents($file, $new) : false;
+    }
+    if (!$enable && $has) {
+        return (bool) file_put_contents($file, preg_replace('#\n?\s*' . preg_quote($marker, '#') . '[^\n]*#', '', $tpl));
+    }
+    return true;
 }
