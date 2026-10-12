@@ -72,8 +72,8 @@ html.lwba .lwba-topbar #intelliSearchForm .fa-search{position:absolute!important
 html.lwba .lwba-topbar .visible-sidebar{display:none!important}
 html.lwba .lwba-topbar #intelliSearchForm .input-group{width:100%!important; display:block!important; position:static!important}
 /* Recherche active : la loupe reste visible, le bouton × est dans le champ (et non en dessous). */
-html.lwba .lwba-topbar #intelliSearchForm .fa-search{display:block!important; opacity:1!important; visibility:visible!important; width:auto!important; height:auto!important; line-height:1!important; padding:0!important; margin:0!important; top:50%!important; transform:translateY(-50%)}
-html.lwba .lwba-topbar #intelliSearchForm .input-group-btn{position:absolute!important; right:6px; top:50%; transform:translateY(-50%); width:auto!important; display:block!important; z-index:3}
+html.lwba .lwba-topbar #intelliSearchForm .fa-search{display:block!important; opacity:1!important; visibility:visible!important; width:auto!important; height:auto!important; line-height:1!important; padding:0!important; margin:0!important; top:21px!important; transform:translateY(-50%)}
+html.lwba .lwba-topbar #intelliSearchForm .input-group-btn{position:absolute!important; right:6px; top:21px!important; transform:translateY(-50%); width:auto!important; display:block!important; z-index:3}
 html.lwba .lwba-topbar #intelliSearchForm .input-group-btn .btn{width:30px; height:30px; padding:0!important; border:0!important; border-radius:8px!important; background:transparent!important; color:var(--a-ink3)!important; box-shadow:none!important}
 html.lwba .lwba-topbar #intelliSearchForm .input-group-btn .btn:hover{background:var(--a-page)!important; color:var(--a-ink)!important}
 html.lwba .lwba-topbar #intelliSearchForm input.form-control{padding-right:42px!important}
