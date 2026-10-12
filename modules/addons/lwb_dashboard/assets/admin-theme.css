@@ -328,3 +328,111 @@ html.lwba .lwba-toast.on{opacity:1; transform:translate(-50%,0)}
   html.lwba .lwba-chips{flex-wrap:nowrap; overflow-x:auto; padding-bottom:4px}
   html.lwba .lwba-listtools .save{display:none}
 }
+
+/* ======================================================================
+ * v1.5 — finitions : pastilles de statut, montants, menu « ⋯ », listes
+ * vides, fiche client, pages d'erreur, journal des paiements.
+ * ====================================================================== */
+
+/* Statuts en pastilles */
+html.lwba .lwba-pill{display:inline-flex; align-items:center; gap:6px; padding:3px 10px 3px 8px; border-radius:999px; font-size:11.5px; font-weight:700; line-height:1.5; white-space:nowrap; letter-spacing:.01em}
+html.lwba .lwba-pill::before{content:""; width:6px; height:6px; border-radius:50%; background:currentColor; flex:none}
+html.lwba .lwba-pill-good{background:var(--a-good-bg); color:var(--a-good-txt)}
+html.lwba .lwba-pill-warn{background:var(--a-warn-bg); color:var(--a-warn-txt)}
+html.lwba .lwba-pill-bad{background:var(--a-bad-bg); color:var(--a-bad-txt)}
+html.lwba .lwba-pill-info{background:var(--a-info-bg); color:var(--a-info-txt)}
+html.lwba .lwba-pill-mute{background:#eef0f4; color:#5d6177}
+html.lwba td a:has(> .lwba-pill){text-decoration:none!important}
+
+/* Montants : une ligne, alignés à droite, chiffres de même largeur */
+/* En-têtes longs sur deux lignes plutôt qu'un tableau qui déborde (la colonne d'actions reste visible) */
+html.lwba table.datatable th,html.lwba .tablebg table th{white-space:normal!important; line-height:1.35}
+html.lwba table th.lwba-num,html.lwba table td.lwba-num{text-align:right!important; white-space:nowrap!important; font-variant-numeric:tabular-nums}
+html.lwba table td.lwba-num a{white-space:nowrap}
+
+/* Lignes plus compactes */
+html.lwba table.datatable td,html.lwba .tablebg table td{padding:9px 12px!important; line-height:1.45}
+html.lwba table.datatable th,html.lwba .tablebg table th{padding:10px 12px!important}
+html.lwba table.datatable td.lwba-actions,html.lwba .tablebg table td.lwba-actions{width:1%; text-align:right!important; padding:4px 10px!important}
+
+/* Menu « ⋯ » des actions de ligne */
+html.lwba .lwba-kebab{position:relative; display:inline-block}
+html.lwba .lwba-kebab-btn{width:32px; height:32px; border:1px solid transparent; border-radius:9px; background:transparent; color:var(--a-ink2); display:inline-flex; align-items:center; justify-content:center; cursor:pointer; transition:background .15s,border-color .15s}
+html.lwba .lwba-kebab-btn:hover,html.lwba .lwba-kebab.open .lwba-kebab-btn{background:#fff; border-color:var(--a-line); color:var(--a-brand); box-shadow:var(--a-shadow)}
+html.lwba .lwba-kebab-menu{display:none; position:fixed; z-index:1060; min-width:180px; padding:6px; background:#fff; border:1px solid var(--a-line); border-radius:12px; box-shadow:0 12px 32px rgba(13,13,43,.16); text-align:left}
+html.lwba .lwba-kebab.open .lwba-kebab-menu{display:block}
+html.lwba .lwba-kebab-item{display:flex!important; align-items:center; gap:8px; width:100%; padding:8px 12px!important; margin:0!important; border:0!important; border-radius:8px!important; background:transparent!important; color:var(--a-ink)!important; font-size:13px!important; font-weight:600!important; text-align:left!important; text-decoration:none!important; box-shadow:none!important; cursor:pointer; white-space:nowrap; height:auto!important; line-height:1.4!important}
+html.lwba .lwba-kebab-item:hover{background:var(--a-brand50)!important; color:var(--a-brand)!important}
+html.lwba .lwba-kebab-item.danger{color:var(--a-bad-txt)!important}
+html.lwba .lwba-kebab-item.danger:hover{background:var(--a-bad-bg)!important}
+html.lwba .lwba-kebab-sep{height:1px; margin:5px 4px; background:var(--a-line2)}
+
+/* Petites icônes modifier / supprimer dans les tableaux */
+html.lwba a.lwba-iconbtn{display:inline-flex; align-items:center; justify-content:center; width:30px; height:30px; border-radius:8px; color:var(--a-ink3)!important; text-decoration:none!important; transition:background .15s,color .15s}
+html.lwba a.lwba-iconbtn:hover{background:var(--a-brand50); color:var(--a-brand)!important}
+html.lwba a.lwba-iconbtn.danger:hover{background:var(--a-bad-bg); color:var(--a-bad-txt)!important}
+
+/* Listes vides */
+html.lwba td.lwba-empty{padding:34px 16px!important; background:#fff!important}
+html.lwba .lwba-empty-box{display:flex; flex-direction:column; align-items:center; gap:6px; text-align:center; color:var(--a-ink2)}
+html.lwba .lwba-empty-box > i{width:52px; height:52px; border-radius:16px; background:var(--a-brand50); color:var(--a-brand); display:flex; align-items:center; justify-content:center; font-size:21px; margin-bottom:6px}
+html.lwba .lwba-empty-box b{font-size:14.5px; color:var(--a-ink)}
+html.lwba .lwba-empty-box span{font-size:12.5px; max-width:380px}
+html.lwba .lwba-empty-add{margin-top:10px; padding:8px 16px; border:0; border-radius:10px; background:var(--a-brand); color:#fff; font-weight:700; font-size:13px; cursor:pointer}
+html.lwba .lwba-empty-add::before{content:"+ "}
+html.lwba .lwba-empty-add:hover{background:var(--a-brand2)}
+
+/* Fiche client */
+html.lwba.lwba-client .client-summary-panels{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:16px; margin:0 0 16px!important}
+html.lwba.lwba-client .client-summary-panels::before,html.lwba.lwba-client .client-summary-panels::after{display:none}
+html.lwba.lwba-client .client-summary-panels > [class*=col-]{width:auto!important; float:none!important; padding:0!important; min-width:0}
+@media (max-width:1599px){ html.lwba.lwba-client .client-summary-panels{grid-template-columns:repeat(2,minmax(0,1fr))} }
+@media (max-width:767px){ html.lwba.lwba-client .client-summary-panels{grid-template-columns:1fr} }
+html.lwba .clientssummarybox{margin:0 0 16px!important}
+html.lwba .clientssummarybox .title{text-align:left!important}
+html.lwba table.clientssummarystats{width:100%!important; border:0!important}
+html.lwba table.clientssummarystats td{padding:7px 18px!important; border:0!important; border-bottom:1px solid var(--a-line2)!important; background:#fff!important; font-size:13px; vertical-align:top}
+html.lwba table.clientssummarystats tr td:first-child:not(:only-child){color:var(--a-ink2); font-weight:600; width:42%!important}
+html.lwba table.clientssummarystats tr.altrow td{background:#fff!important}
+html.lwba .clientssummarybox ul{list-style:none; margin:0!important; padding:10px 12px!important}
+html.lwba .clientssummarybox ul li{padding:0!important; margin:0!important; background:none!important}
+html.lwba .clientssummarybox ul li a{display:inline-flex; align-items:center; gap:9px; padding:6px 8px; border-radius:8px; font-weight:600; font-size:13px; text-decoration:none!important}
+html.lwba .clientssummarybox ul li a:hover{background:var(--a-brand50)}
+html.lwba i.lwba-legacy-ic{width:18px; text-align:center; color:var(--a-brand); opacity:.85; font-size:13px}
+html.lwba i.lwba-legacy-ic.danger{color:var(--a-bad-txt)}
+html.lwba .clientssummarybox ul li a[style*="cc0000"],html.lwba .clientssummarybox ul li a[style*="red"]{color:var(--a-bad-txt)!important}
+html.lwba a.lwba-maplink{display:inline-flex; align-items:center; gap:5px; padding:2px 9px; border-radius:999px; background:var(--a-brand50); font-size:12px; font-weight:700; text-decoration:none!important; white-space:nowrap}
+
+/* Pages d'erreur (page introuvable, action impossible…) */
+html.lwba.lwba-errorpage #contentarea > div > h1{display:none}
+html.lwba .error-page{max-width:560px; margin:48px auto!important; padding:34px 30px!important; background:#fff!important; border:1px solid var(--a-line)!important; border-radius:18px!important; box-shadow:var(--a-shadow)!important; text-align:center}
+html.lwba .error-page .error-heading,html.lwba .error-page .error-body,html.lwba .error-page .error-footer{background:none!important; border:0!important; padding:0!important; color:var(--a-ink)!important}
+html.lwba .error-page .error-title{font-size:22px!important; font-weight:800!important; color:var(--a-ink)!important; margin:0 0 10px!important}
+html.lwba .error-page .error-title i{display:flex; align-items:center; justify-content:center; width:56px; height:56px; margin:0 auto 14px; border-radius:16px; background:var(--a-warn-bg); color:var(--a-warn-txt); font-size:22px}
+html.lwba .error-page .error-body p{color:var(--a-ink2); margin:0 0 4px}
+html.lwba .error-page .error-body br{display:none}
+html.lwba .error-page .error-footer .buttons{display:flex; justify-content:center; gap:10px; margin-top:18px; flex-wrap:wrap}
+html.lwba .error-page .error-footer .btn:last-child{background:var(--a-brand)!important; border-color:var(--a-brand)!important; color:#fff!important}
+
+/* Journal des paiements */
+html.lwba tr.lwba-glog td{vertical-align:top!important}
+html.lwba .lwba-glog-sum{font-size:13px; color:var(--a-ink); line-height:1.5}
+html.lwba .lwba-glog-sum i{color:var(--a-ink3)}
+html.lwba .lwba-glog-msg{margin-top:2px; color:var(--a-ink2); font-size:12.5px}
+html.lwba details.lwba-glog-det{margin-top:6px}
+html.lwba details.lwba-glog-det summary{cursor:pointer; color:var(--a-brand); font-size:12px; font-weight:700; list-style:none}
+html.lwba details.lwba-glog-det summary::before{content:"▸ "} html.lwba details.lwba-glog-det[open] summary::before{content:"▾ "}
+html.lwba details.lwba-glog-det textarea{margin-top:6px; font-family:ui-monospace,SFMono-Regular,Menlo,monospace!important; font-size:11.5px!important}
+
+/* Fenêtre « Nouveautés de la version » de WHMCS */
+html.lwba .modal-content .feature-highlights-content,html.lwba #modalFeatureHighlights .modal-body{font-family:var(--a-font)!important}
+html.lwba #modalFeatureHighlights .modal-content{border-radius:18px!important; overflow:hidden}
+
+@media (max-width:767px){
+  html.lwba table.datatable td,html.lwba .tablebg table td{padding:8px 10px!important}
+  html.lwba .lwba-kebab-btn{width:36px; height:36px}
+}
+/* Colonne « + » (détail rapide) des listes de services et domaines : étroite */
+html.lwba table.datatable td:has(> a.view-detail),html.lwba table.datatable td:has(> a > img[src$="delete.gif"]):last-child{width:1%; padding:4px 8px!important; white-space:nowrap}
+html.lwba table.datatable a.view-detail{display:inline-flex; align-items:center; justify-content:center; width:28px; height:28px; border-radius:8px; color:var(--a-ink3)!important}
+html.lwba table.datatable a.view-detail:hover{background:var(--a-brand50); color:var(--a-brand)!important}

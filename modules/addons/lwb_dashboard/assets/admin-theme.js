@@ -49,9 +49,10 @@
     var back = document.createElement('div'); back.className = 'lwba-backdrop'; document.body.appendChild(back);
     $('.lwba-burger', top).addEventListener('click', function () { html.classList.toggle('lwba-nav-open'); });
     // Menu de la section masquable, mémorisé d'une page à l'autre (pour les grands tableaux).
-    var store = { get: function () { try { return localStorage.getItem('lwbaSide'); } catch (e) { return null; } },
-        set: function (v) { try { localStorage.setItem('lwbaSide', v); } catch (e) {} } };
-    if (store.get() === 'hidden') { html.classList.add('lwba-sidehidden'); }
+    // Par défaut le panneau est masqué : ses liens font doublon avec le menu de gauche (v1.5).
+    var store = { get: function () { try { return localStorage.getItem('lwbaSide2'); } catch (e) { return null; } },
+        set: function (v) { try { localStorage.setItem('lwbaSide2', v); } catch (e) {} } };
+    if (store.get() !== 'shown') { html.classList.add('lwba-sidehidden'); }
     $('.lwba-sidetoggle', top).addEventListener('click', function () {
         html.classList.toggle('lwba-sidehidden');
         store.set(html.classList.contains('lwba-sidehidden') ? 'hidden' : 'shown');

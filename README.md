@@ -70,7 +70,21 @@ Le thème s'applique par-dessus le thème WHMCS d'origine (Blend), sans le modif
 - un interrupteur dans **Réglages › Thème de l'administration** le désactive instantanément ;
 - le bouton à gauche du titre, dans la barre du haut, masque ou affiche le menu de la section, pour travailler en pleine largeur sur les grands tableaux.
 
-Trois écrans autonomes de WHMCS gardent leur propre design : WHMCS Connect, l'assistant « Getting started » et la page d'erreur.
+### Finitions (1.5)
+
+- **Listes plus compactes** : les boutons Voir / Editer / Supprimer de chaque ligne sont regroupés dans un menu « ⋯ ». La suppression est rangée en bas du menu, en rouge. Les petites images modifier / supprimer sont remplacées par des icônes discrètes.
+- **Statuts en pastilles de couleur**, identiques partout : vert (actif, payé), orange (en attente, non payé), rouge (impayé, suspendu, échec), gris (annulé, fermé). Les statuts restés en anglais (Active, Pending…) sont traduits.
+- **Montants** sur une seule ligne, alignés à droite.
+- **Fiche client** : icônes du thème à la place des anciennes icônes de WHMCS, panneaux sur deux colonnes sur les écrans moyens, et lien « Voir sur la carte » quand l'adresse contient des coordonnées GPS.
+- **Panneau de la section masqué par défaut**, puisque ses liens font doublon avec le menu de gauche. Le bouton de la barre du haut le réaffiche (recherche avancée, filtres).
+- **Traduction corrigée** : « ticket » au lieu de « billet », « Support » au lieu de « soutien », « Affiliés », « Adresse », « Registraire »… L'extension génère `kota/lang/overrides/french.php` à partir de la traduction installée. WHMCS ne touche pas à ce fichier lors des mises à jour, et l'extension le régénère si la traduction de WHMCS change. Les textes que WHMCS écrit en dur en anglais (statuts, tâches, en-têtes) sont traduits à l'affichage.
+- **Pages d'erreur** (page introuvable…) dans le design du thème, en français.
+- **Listes vides** : message clair, et bouton d'ajout quand la page en propose un.
+- **Journal des paiements** : un résumé lisible (montant, téléphone, référence, « Paiement refusé par l'opérateur »…), avec le détail technique repliable.
+
+Ces finitions ne changent que l'affichage : aucune donnée n'est modifiée.
+
+Deux écrans autonomes de WHMCS gardent leur propre design : WHMCS Connect et l'assistant « Getting started ». La page brute « Invalid CSRF Protection Token », affichée par WHMCS sans aucun modèle de page, ne peut pas être habillée.
 
 La page de connexion est habillée par une ligne ajoutée à `login.tpl`. WHMCS remplace ce fichier à chaque mise à jour, et l'extension remet la ligne automatiquement à la connexion suivante.
 
@@ -152,6 +166,7 @@ modules/addons/lwb_dashboard/
 ├── lib/todo.php        file « À faire », liens WhatsApp et de paiement
 ├── lib/notify.php      centre de notifications
 ├── lib/view.php        affichage HTML et graphiques SVG
+├── lib/lang.php        corrections de la traduction française (overrides)
 └── assets/             styles et info-bulles
 ```
 
@@ -163,6 +178,7 @@ Les captures utilisent des données d'exemple.
 
 ## Historique
 
+- **1.5** : finitions sur toute l'administration : menu « ⋯ » pour les actions de ligne, statuts en pastilles, montants alignés, fiche client modernisée, panneau de section masqué par défaut, traduction corrigée (ticket, Support…), pages d'erreur, listes vides et journal des paiements lisibles.
 - **1.4** : file « À faire » avec actions en un clic, centre de notifications, listes intelligentes (filtres, recherches enregistrées, colonnes, en-tête fixe, barre de sélection), actions mobiles et WhatsApp ; correction du bouton « + Facture » (jeton de sécurité manquant).
 - **1.3.1** : passe complète sur les 239 pages de l'administration ; menus latéraux plus fins, bouton pour masquer le menu de la section (mémorisé), entrée « Configuration » dans le menu, anciennes icônes WHMCS harmonisées, page de connexion ajustée sur mobile.
 - **1.3** : thème Lwb-admin pour toute l'administration et la page de connexion, activable dans les Réglages.

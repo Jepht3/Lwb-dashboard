@@ -12,6 +12,7 @@ require_once __DIR__ . '/lib/health.php';
 require_once __DIR__ . '/lib/view.php';
 require_once __DIR__ . '/lib/todo.php';
 require_once __DIR__ . '/lib/notify.php';
+require_once __DIR__ . '/lib/lang.php';
 
 use WHMCS\Database\Capsule;
 
@@ -107,6 +108,11 @@ add_hook('AdminAreaHeadOutput', 1, function ($vars) {
         if (lwbd_settings()['admin_theme'] === 'on' && empty($_SESSION['lwbd_login_checked'])) {
             // Après une mise à jour de WHMCS, login.tpl est remplacé : on remet la ligne du thème.
             lwbd_login_patch(true);
+            // Idem pour la traduction corrigée : recréée si absente ou plus ancienne que celle de WHMCS.
+            $ov = lwbd_admin_dir() . '/lang/overrides/french.php';
+            if (!is_file($ov) || @filemtime($ov) < @filemtime(lwbd_admin_dir() . '/lang/french.php')) {
+                lwbd_lang_install();
+            }
             $_SESSION['lwbd_login_checked'] = 1;
         }
         $allowed = lwbd_admin_allowed();
@@ -134,6 +140,7 @@ add_hook('AdminAreaFooterOutput', 1, function ($vars) {
         }
         $base = rtrim((string) \WHMCS\Config\Setting::getValue('SystemURL'), '/') . '/modules/addons/lwb_dashboard/assets/';
         return '<script src="' . $base . 'admin-theme.js?v=' . @filemtime(__DIR__ . '/assets/admin-theme.js') . '"></script>'
+            . '<script src="' . $base . 'admin-polish.js?v=' . @filemtime(__DIR__ . '/assets/admin-polish.js') . '"></script>'
             . '<script src="' . $base . 'admin-tools.js?v=' . @filemtime(__DIR__ . '/assets/admin-tools.js') . '"></script>';
     } catch (\Throwable $e) {
         return '';

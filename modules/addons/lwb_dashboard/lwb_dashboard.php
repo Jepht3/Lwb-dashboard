@@ -22,13 +22,14 @@ require_once __DIR__ . '/lib/actions.php';
 require_once __DIR__ . '/lib/todo.php';
 require_once __DIR__ . '/lib/notify.php';
 require_once __DIR__ . '/lib/view.php';
+require_once __DIR__ . '/lib/lang.php';
 
 function lwb_dashboard_config()
 {
     return [
         'name' => 'Lwb-dashboard',
         'description' => 'Tableau de bord LEWEBMAX : encaissements, revenu récurrent, impayés, renouvellements, domaines à risque, commandes et tickets sur une seule page.',
-        'version' => '1.4',
+        'version' => '1.5',
         'author' => 'LEWEBMAX',
         // Les réglages se font sur la page « Réglages » du tableau de bord, dans le même design.
         'fields' => [],
@@ -38,11 +39,13 @@ function lwb_dashboard_config()
 function lwb_dashboard_upgrade($vars)
 {
     lwbd_snooze_table();
-    // Rien à migrer : les réglages existants (objectif, période, accueil) sont repris tels quels.
+    // Traduction française corrigée de l'administration (« ticket », « Support »…).
+    lwbd_lang_install();
 }
 
 function lwb_dashboard_activate()
 {
+    lwbd_lang_install();
     return ['status' => 'success', 'description' => 'Tableau de bord activé : Modules complémentaires > Lwb-dashboard, et widget sur l\'accueil de l\'administration.'];
 }
 
