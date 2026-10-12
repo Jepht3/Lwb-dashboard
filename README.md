@@ -1,13 +1,15 @@
-# Lwb-dashboard
+# LWB Admin (Lwb-dashboard)
 
-Tableau de bord **et thème complet** pour l'administration de WHMCS 8, aux couleurs de LEWEBMAX.
+Tableau de bord **et thème complet** pour l'administration de **n'importe quel WHMCS 8**. Open source (licence MIT), par LEWEBMAX Admin.
+
+Votre nom, votre logo, vos couleurs et votre police se règlent dans la page Réglages. Les montants s'affichent dans la devise par défaut de WHMCS. Les intégrations (FlexPay, crédit du registraire) n'apparaissent que si elles sont utilisées.
 
 - **Le tableau de bord** réunit sur une seule page tout ce qu'il faut suivre au quotidien : argent encaissé, impayés, renouvellements, domaines à risque, commandes et tickets.
 - **Le thème « Lwb-admin »** modernise toute l'administration :
-  - menu latéral bleu nuit à icônes et barre de recherche en haut ;
+  - menu latéral à icônes, aux couleurs de votre marque, et barre de recherche en haut ;
   - menus contextuels épurés ;
   - tableaux, formulaires, onglets, boutons, statuts et fenêtres redessinés ;
-  - page de connexion à la marque LEWEBMAX ;
+  - page de connexion à votre marque (facultatif) ;
   - version mobile avec menu coulissant.
 
 ![Aperçu sur ordinateur](docs/apercu-bureau.png)
@@ -24,7 +26,7 @@ Tout ce qui attend une action, au même endroit : menu latéral › « À faire 
 | Commandes à valider | **Accepter** (lance l'activation), Ouvrir |
 | Services payés non activés | **Activer**, Ouvrir |
 | Tickets à répondre | **Répondre** |
-| Factures dues sous 3 jours ou en retard depuis moins de 30 jours | **Relancer par e-mail**, **WhatsApp** (message prêt avec le lien de paiement Mobile Money), **Copier le lien**, Ouvrir |
+| Factures dues sous 3 jours ou en retard depuis moins de 30 jours | **Relancer par e-mail**, **WhatsApp** (message prêt avec le lien de paiement : FlexPay Mobile Money s'il est actif, sinon la facture en ligne), **Copier le lien**, Ouvrir |
 | Domaines en danger (grâce, rédemption, payés non renouvelés) | **Prévenir le client**, Ouvrir |
 | Actions de modules en échec, demandes de résiliation | Ouvrir |
 
@@ -77,7 +79,7 @@ Le thème s'applique par-dessus le thème WHMCS d'origine (Blend), sans le modif
 - **Montants** sur une seule ligne, alignés à droite.
 - **Fiche client** : icônes du thème à la place des anciennes icônes de WHMCS, panneaux sur deux colonnes sur les écrans moyens, et lien « Voir sur la carte » quand l'adresse contient des coordonnées GPS.
 - **Panneau de la section masqué par défaut**, puisque ses liens font doublon avec le menu de gauche. Le bouton de la barre du haut le réaffiche (recherche avancée, filtres).
-- **Traduction corrigée** : « ticket » au lieu de « billet », « Support » au lieu de « soutien », « Affiliés », « Adresse », « Registraire »… L'extension génère `kota/lang/overrides/french.php` à partir de la traduction installée. WHMCS ne touche pas à ce fichier lors des mises à jour, et l'extension le régénère si la traduction de WHMCS change. Les textes que WHMCS écrit en dur en anglais (statuts, tâches, en-têtes) sont traduits à l'affichage.
+- **Traduction corrigée** : « ticket » au lieu de « billet », « Support » au lieu de « soutien », « Affiliés », « Adresse », « Registraire »… L'extension génère `{dossier admin}/lang/overrides/french.php` à partir de la traduction installée. WHMCS ne touche pas à ce fichier lors des mises à jour, et l'extension le régénère si la traduction de WHMCS change. Les textes que WHMCS écrit en dur en anglais (statuts, tâches, en-têtes) sont traduits à l'affichage.
 - **Pages d'erreur** (page introuvable…) dans le design du thème, en français.
 - **Listes vides** : message clair, et bouton d'ajout quand la page en propose un.
 - **Journal des paiements** : un résumé lisible (montant, téléphone, référence, « Paiement refusé par l'opérateur »…), avec le détail technique repliable.
@@ -86,7 +88,7 @@ Ces finitions ne changent que l'affichage : aucune donnée n'est modifiée.
 
 Deux écrans autonomes de WHMCS gardent leur propre design : WHMCS Connect et l'assistant « Getting started ». La page brute « Invalid CSRF Protection Token », affichée par WHMCS sans aucun modèle de page, ne peut pas être habillée.
 
-La page de connexion est habillée par une ligne ajoutée à `login.tpl`. WHMCS remplace ce fichier à chaque mise à jour, et l'extension remet la ligne automatiquement à la connexion suivante.
+La page de connexion est habillée par une ligne ajoutée à `login.tpl`. WHMCS remplace ce fichier à chaque mise à jour, et l'extension remet la ligne automatiquement à la connexion suivante. Si vous préférez que l'extension ne touche à aucun fichier de WHMCS, décochez **Réglages › Habiller aussi la page de connexion**.
 
 La mention de copyright de WHMCS reste affichée, comme l'exige la licence.
 
@@ -121,7 +123,7 @@ La mention de copyright de WHMCS reste affichée, comme l'exige la licence.
   - extrait du journal d'activité.
 - **Bouton « Relancer »** sur les plus gros impayés : envoie l'e-mail de relance adapté au retard, au plus une fois par jour et par facture.
 - **Export CSV** (compatible Excel) des impayés, des renouvellements et des domaines à surveiller.
-- Un **widget** « LEWEBMAX en un coup d'œil » sur l'accueil de l'administration, avec un bandeau en cas d'alerte urgente.
+- Un **widget** « {votre nom} en un coup d'œil » sur l'accueil de l'administration, avec un bandeau en cas d'alerte urgente. Il n'est proposé qu'aux administrateurs autorisés à voir l'extension.
 
 Chaque ligne renvoie vers la fiche correspondante : client, facture, service, domaine, commande ou ticket. La page s'adapte au mobile.
 
@@ -130,9 +132,9 @@ L'extension ne modifie aucune donnée. Seules exceptions : le bouton « Relancer
 ## Installation
 
 1. Copier le dossier `modules/addons/lwb_dashboard` dans `modules/addons/` de WHMCS.
-2. Dans l'administration, aller dans **Configuration › Modules complémentaires**, puis **Activer** sur « Lwb-dashboard ».
+2. Dans l'administration, aller dans **Configuration › Modules complémentaires**, puis **Activer** sur « LWB Admin ».
 3. Choisir les rôles d'administrateur autorisés à voir le tableau de bord.
-4. Ouvrir **Modules complémentaires › Lwb-dashboard**. Le widget apparaît sur l'accueil de l'administration.
+4. Ouvrir **Modules complémentaires › LWB Admin**, puis **Réglages** : renseigner la marque et activer le thème si vous le souhaitez. Le widget apparaît sur l'accueil de l'administration.
 
 ## Réglages
 
@@ -144,7 +146,13 @@ Le bouton **Réglages**, en haut du tableau de bord, ouvre une page dans le mêm
   - objectif d'encaissement mensuel ; laissez le champ vide pour masquer la jauge ;
   - période affichée à l'ouverture : 6, 12 ou 24 mois.
 - **Démarrage** : ouvre le tableau de bord après la connexion, à la place de l'accueil WHMCS. Le lien « Accueil WHMCS classique » reste disponible.
-- **Thème de l'administration** : active ou désactive le thème Lwb-admin pour tous les administrateurs.
+- **Thème de l'administration** : active ou désactive le thème Lwb-admin pour tous les administrateurs, et choisit d'habiller ou non la page de connexion.
+- **Marque** :
+  - nom affiché (vide : le nom de la société dans WHMCS), repris dans le widget, le menu et les messages WhatsApp ;
+  - logo blanc pour le menu et la page de connexion (vide : le logo de WHMCS) ;
+  - couleur principale et couleur d'accent ;
+  - police : Plus Jakarta Sans, Inter (Google Fonts) ou la police du système, sans aucun chargement externe ;
+  - groupe de produits mis en avant (abonnements et revenu mensuel sous « Revenus par activité »).
 - **Sections affichées** : un interrupteur par carte pour masquer ce qui ne sert pas. Quand une carte est masquée, sa voisine prend toute la largeur.
 
 Les administrateurs autorisés se choisissent toujours dans WHMCS (Configuration › Modules complémentaires), comme pour toute extension.
@@ -159,7 +167,8 @@ Les administrateurs autorisés se choisissent toujours dans WHMCS (Configuration
 ```
 modules/addons/lwb_dashboard/
 ├── lwb_dashboard.php   configuration, activation, page du module
-├── hooks.php           widget de l'accueil, redirection vers le tableau de bord
+├── hooks.php           thème, notifications, widget de l'accueil, redirection
+├── lib/brand.php       marque, devise, police, registraire, intégration FlexPay
 ├── lib/data.php        calcul des chiffres (requêtes en lecture seule)
 ├── lib/health.php      santé du système, objectif et prévisions
 ├── lib/actions.php     actions (relance, réglages, file « À faire ») avec jeton CSRF WHMCS
@@ -178,6 +187,7 @@ Les captures utilisent des données d'exemple.
 
 ## Historique
 
+- **2.0** : utilisable sur n'importe quel WHMCS. Nom, logo, couleurs et police réglables (carte « Marque »). Montants dans la devise par défaut de WHMCS. Registraire détecté automatiquement. FlexPay facultatif. Groupe de produits mis en avant au choix. Option pour ne pas modifier `login.tpl`. Widget réservé aux rôles autorisés. Plus aucun chargement de Google Fonts écrit en dur.
 - **1.5** : finitions sur toute l'administration : menu « ⋯ » pour les actions de ligne, statuts en pastilles, montants alignés, fiche client modernisée, panneau de section masqué par défaut, traduction corrigée (ticket, Support…), pages d'erreur, listes vides et journal des paiements lisibles.
 - **1.4** : file « À faire » avec actions en un clic, centre de notifications, listes intelligentes (filtres, recherches enregistrées, colonnes, en-tête fixe, barre de sélection), actions mobiles et WhatsApp ; correction du bouton « + Facture » (jeton de sécurité manquant).
 - **1.3.1** : passe complète sur les 239 pages de l'administration ; menus latéraux plus fins, bouton pour masquer le menu de la section (mémorisé), entrée « Configuration » dans le menu, anciennes icônes WHMCS harmonisées, page de connexion ajustée sur mobile.

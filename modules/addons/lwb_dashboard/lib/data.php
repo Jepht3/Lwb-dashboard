@@ -369,6 +369,11 @@ function lwbd_login_patch($enable)
     $tpl = file_get_contents($file);
     $marker = '<!-- lwb-admin-login -->';
     $has = strpos($tpl, $marker) !== false;
+    // Ligne d'une version précédente (sans la feuille de la marque) : on la réécrit.
+    if ($enable && $has && strpos($tpl, 'brand-login.css') === false) {
+        $tpl = preg_replace('#\n?\s*' . preg_quote($marker, '#') . '[^\n]*#', '', $tpl);
+        $has = false;
+    }
     if ($enable && !$has) {
         $base = '../modules/addons/lwb_dashboard/assets/';
         $line = $marker . '<link href="' . $base . 'admin-login.css?v=' . @filemtime(__DIR__ . '/../assets/admin-login.css') . '" rel="stylesheet">';
