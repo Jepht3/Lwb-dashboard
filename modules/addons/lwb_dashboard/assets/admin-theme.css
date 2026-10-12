@@ -450,6 +450,8 @@ html.lwba #modalFeatureHighlights .modal-content{border-radius:18px!important; o
 @media (max-width:767px){
   html.lwba table.datatable td,html.lwba .tablebg table td{padding:8px 10px!important}
   html.lwba .lwba-kebab-btn{width:36px; height:36px}
+  /* iPhone : un champ sous 16 px fait zoomer Safari au toucher. */
+  html.lwba .form-control,html.lwba select,html.lwba textarea,html.lwba input[type=text],html.lwba input[type=email],html.lwba input[type=password],html.lwba input[type=number],html.lwba input[type=date],html.lwba input[type=url],html.lwba input[type=tel],html.lwba input[type=search]{font-size:16px!important}
 }
 /* Colonne « + » (détail rapide) des listes de services et domaines : étroite */
 html.lwba table.datatable td:has(> a.view-detail),html.lwba table.datatable td:has(> a > img[src$="delete.gif"]):last-child{width:1%; padding:4px 8px!important; white-space:nowrap}
