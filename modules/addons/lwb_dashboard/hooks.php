@@ -173,6 +173,8 @@ if (class_exists('\WHMCS\Module\AbstractWidget')) {
             $h = lwbd_health();
             return [
                 'alerts' => (int) !$h['cron']['ok'] + (int) $h['registrar']['no_credit'],
+                'cron_down' => !$h['cron']['ok'],
+                'no_credit' => (bool) $h['registrar']['no_credit'],
                 'month' => $d['month']['current'],
                 'mrr' => $d['mrr'],
                 'unpaid' => $d['unpaid']['total'],
@@ -193,7 +195,8 @@ if (class_exists('\WHMCS\Module\AbstractWidget')) {
                     . '<div style="font-size:11px;font-weight:700;color:#575b78">' . lwbd_e($label) . '</div>'
                     . '<div style="font-size:18px;font-weight:800;color:' . ($alert ? '#b42318' : '#0d0d2b') . ';white-space:nowrap">' . lwbd_e($value) . '</div></div>';
             };
-            $alert = $data['alerts'] ? '<a href="addonmodules.php?module=lwb_dashboard" style="display:block;margin-bottom:8px;padding:9px 12px;border-radius:10px;background:#fdecec;color:#b42318;font-weight:700;text-decoration:none">⚠ ' . (int) $data['alerts'] . ' alerte(s) urgente(s) : cron ou crédit du registraire</a>' : '';
+            $what = array_filter([!empty($data['cron_down']) ? 'le cron WHMCS ne tourne plus' : '', !empty($data['no_credit']) ?'crédit ' . lwbd_main_registrar()['name'] . ' épuisé' : '']);
+            $alert = $what ? '<a href="addonmodules.php?module=lwb_dashboard" style="display:block;margin-bottom:8px;padding:9px 12px;border-radius:10px;background:#fdecec;color:#b42318;font-weight:700;text-decoration:none">⚠ Urgent : ' . lwbd_e(implode(' · ', $what)) . '</a>' : '';
             return '<div style="padding:12px;font-family:var(--a-font,inherit)">' . $alert
                 . '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'
                 . $cell('Encaissé ce mois', lwbd_money($data['month']))

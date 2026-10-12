@@ -28,15 +28,23 @@ function lwbd_days_between($from, $to)
 function lwbd_gateway_names()
 {
     $names = Capsule::table('tblpaymentgateways')->where('setting', 'name')->pluck('value', 'gateway')->all();
-    return $names + ['flexpaie' => 'FlexPay (ancien module)', 'banktransfer' => 'Virement bancaire', 'mailin' => 'Paiement manuel'];
+    // L'ancien module « flexpaie » est regroupé avec le module FlexPay actuel quand il est installé.
+    return $names + ['flexpaie' => $names['flexpay'] ?? 'FlexPay', 'banktransfer' => 'Virement bancaire', 'mailin' => 'Paiement manuel'];
 }
 
-/** Solde restant de chaque facture impayée : [id => balance]. */
+/**
+ * Solde restant de chaque facture impayée : [id => balance].
+ * Les factures groupées (« payer plusieurs factures en une fois », lignes de type Invoice)
+ * sont ignorées : les factures qu'elles regroupent restent impayées et sont déjà comptées.
+ */
 function lwbd_unpaid_invoices()
 {
     return Capsule::table('tblinvoices as i')
         ->join('tblclients as c', 'c.id', '=', 'i.userid')
         ->where('i.status', 'Unpaid')
+        ->whereNotExists(function ($q) {
+            $q->select(Capsule::raw(1))->from('tblinvoiceitems as w')->whereColumn('w.invoiceid', 'i.id')->where('w.type', 'Invoice');
+        })
         ->select('i.id', 'i.invoicenum', 'i.userid', 'i.duedate', 'i.total', 'c.firstname', 'c.lastname', 'c.companyname')
         ->selectRaw('i.total - COALESCE((SELECT SUM(a.amountin - a.amountout) FROM tblaccounts a WHERE a.invoiceid = i.id), 0) AS balance')
         ->get();
@@ -135,7 +143,7 @@ function lwbd_collect($months = 12)
         return $b['balance'] <=> $a['balance'];
     });
     $d['unpaid'] = ['buckets' => $buckets, 'total' => array_sum(array_column($buckets, 'amount')),
-        'count' => array_sum(array_column($buckets, 'count')), 'top' => array_slice($unpaidList, 0, 8)];
+        'count' => array_sum(array_column($buckets, 'count')), 'top' => array_slice($unpaidList, 0, 5)];
 
     // Clients, services, domaines, commandes, tickets ----------------
     $d['clients'] = [

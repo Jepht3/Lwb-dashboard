@@ -36,6 +36,23 @@ function lwbd_log_excerpt($text, $max = 150)
 }
 
 /**
+ * Un enregistrement ou un renouvellement de domaine a-t-il réussi depuis $date ?
+ * Signes de réussite : date d'enregistrement d'un domaine, ou e-mail de confirmation envoyé.
+ */
+function lwbd_registrar_success_since($date)
+{
+    if (Capsule::table('tbldomains')->where('registrationdate', '>', substr((string) $date, 0, 10))->whereIn('status', ['Active'])->exists()) {
+        return true;
+    }
+    return Capsule::table('tblactivitylog')->where('date', '>', $date)
+        ->where(function ($q) {
+            foreach (['%Domain Registration Confirmation%', '%Domain Renewal Confirmation%', '%Confirmation d%enregistrement%', '%Confirmation de renouvellement%', '%Domain Renewal Successful%', '%Domain Registered%'] as $k) {
+                $q->orWhere('description', 'like', $k);
+            }
+        })->exists();
+}
+
+/**
  * État du cron, échecs chez le registraire, erreurs récentes, résiliations,
  * services payés non activés et e-mails envoyés.
  */
@@ -57,6 +74,10 @@ function lwbd_health()
         // Messages de manque de crédit des registraires courants (Porkbun, Namecheap, ResellerClub…).
         return (bool) preg_match('/insufficient[_ ](funds|balance)|credit is \$0|not enough (funds|balance)|insufficient credit/i', $r->description);
     });
+    // Le crédit a été rechargé si un domaine a été enregistré ou renouvelé depuis l'échec.
+    if ($noCredit && lwbd_registrar_success_since($noCredit->date)) {
+        $noCredit = null;
+    }
 
     $errors = Capsule::table('tblactivitylog')->where('date', '>=', $since)
         ->where(function ($q) {

@@ -63,6 +63,7 @@ function lwbd_icon($name)
         'target' => '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/>',
         'lock' => '<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
         'tool' => '<path d="M14.7 6.3a4 4 0 0 0-5.4 5.2L3 17.8V21h3.2l6.3-6.3a4 4 0 0 0 5.2-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/>',
+        'palette' => '<path d="M12 3a9 9 0 1 0 0 18c1.1 0 1.8-.8 1.8-1.7 0-.5-.2-.9-.5-1.2-.3-.3-.5-.7-.5-1.2 0-.9.8-1.7 1.8-1.7H17a4 4 0 0 0 4-4c0-4.6-4-8.2-9-8.2z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10" cy="7" r="1"/><circle cx="14.5" cy="7" r="1"/>',
     ][$name] ?? '';
     return '<svg class="lwbd-ic" viewBox="0 0 24 24" aria-hidden="true">' . $p . '</svg>';
 }
@@ -298,12 +299,13 @@ function lwbd_render(array $d, $modulelink, array $opt = [])
     }
 
     $maint = '';
-    if ($d['maintenance']) {
+    if ($d['maintenance'] && ($d['maintenance']['active'] + $d['maintenance']['pending']) > 0) {
         $mt = $d['maintenance'];
         $maint = '<div class="lwbd-mini"><span class="lwbd-kpi-ic">' . lwbd_icon('tool') . '</span><div><b>' . lwbd_e($mt['name']) . '</b><small>'
             . $mt['active'] . ' abonnement(s) actif(s) · ' . $mt['pending'] . ' en attente de paiement · ' . lwbd_e(lwbd_money($mt['mrr'])) . ' par mois</small></div></div>';
     }
-    $lateFees = $d['late_fees'] > 0 ? '<p class="lwbd-note">Pénalités de retard encaissées sur la période&nbsp;: <b>' . lwbd_e(lwbd_money($d['late_fees'])) . '</b></p>' : '';
+    // Les pénalités de retard ont déjà leur propre barre dans « Revenus par activité ».
+    $lateFees = '';
 
     $actions = '<div class="lwbd-actions">'
         . '<a class="lwbd-btn todo" href="' . lwbd_e($modulelink . '&view=todo') . '">' . lwbd_icon('list') . 'À faire' . (isset($opt['todo_count']) && $opt['todo_count'] ? ' <b class="lwbd-pill">' . (int) $opt['todo_count'] . '</b>' : '') . '</a>'
@@ -475,12 +477,16 @@ function lwbd_brand_fields(array $brand)
         $groups .= '<option value="' . (int) $g->id . '"' . ((string) $g->id === (string) $brand['featured_group'] ? ' selected' : '') . '>' . lwbd_e($g->name) . '</option>';
     }
     $company = (string) \WHMCS\Config\Setting::getValue('CompanyName');
-    return '<section class="lwbd-card lwbd-set-wide"><header class="lwbd-set-h"><span class="lwbd-kpi-ic">' . lwbd_icon('target') . '</span><div><h2>Marque</h2><p>Votre nom, votre logo et vos couleurs, sur le tableau de bord, le thème et la page de connexion.</p></div></header>'
+    $hex = function ($name, $value) {
+        return '<span class="lwbd-input lwbd-color"><input type="color" name="' . $name . '" value="' . lwbd_e($value) . '" oninput="this.nextElementSibling.textContent=this.value"><code>' . lwbd_e($value) . '</code></span>';
+    };
+    $preview = $brand['brand_logo'] !== '' ? '<span class="lwbd-logo-preview"><img src="' . lwbd_e($brand['brand_logo']) . '" alt=""></span>' : '';
+    return '<section class="lwbd-card lwbd-set-wide"><header class="lwbd-set-h"><span class="lwbd-kpi-ic">' . lwbd_icon('palette') . '</span><div><h2>Marque</h2><p>Votre nom, votre logo et vos couleurs, sur le tableau de bord, le thème et la page de connexion.</p></div></header>'
         . '<div class="lwbd-brand-grid">'
         . '<label class="lwbd-field"><span>Nom affiché</span><span class="lwbd-input"><input type="text" name="brand_name" maxlength="60" value="' . lwbd_e(lwbd_brand_raw('brand_name')) . '" placeholder="' . lwbd_e($company) . '"></span><small>Vide : le nom de la société dans WHMCS. Repris dans les messages WhatsApp.</small></label>'
-        . '<label class="lwbd-field"><span>Logo blanc (menu et connexion)</span><span class="lwbd-input"><input type="url" name="brand_logo" maxlength="300" value="' . lwbd_e($brand['brand_logo']) . '" placeholder="https://…/logo-blanc.png"></span><small>Vide : le logo d\'origine de WHMCS.</small></label>'
-        . '<label class="lwbd-field"><span>Couleur principale</span><span class="lwbd-input"><input type="color" name="brand_color" value="' . lwbd_e($brand['brand_color']) . '"></span></label>'
-        . '<label class="lwbd-field"><span>Couleur d\'accent</span><span class="lwbd-input"><input type="color" name="brand_accent" value="' . lwbd_e($brand['brand_accent']) . '"></span></label>'
+        . '<label class="lwbd-field"><span>Logo blanc (menu et connexion)</span><span class="lwbd-input"><input type="url" name="brand_logo" maxlength="300" value="' . lwbd_e($brand['brand_logo']) . '" placeholder="https://…/logo-blanc.png"></span>' . $preview . '<small>Vide : le logo d\'origine de WHMCS.</small></label>'
+        . '<label class="lwbd-field"><span>Couleur principale</span>' . $hex('brand_color', $brand['brand_color']) . '<small>Menu, boutons et graphiques. Par défaut : #030673.</small></label>'
+        . '<label class="lwbd-field"><span>Couleur d\'accent</span>' . $hex('brand_accent', $brand['brand_accent']) . '<small>Petits titres et repères. Par défaut : #ff6a3d.</small></label>'
         . '<label class="lwbd-field"><span>Police</span><span class="lwbd-input"><select name="brand_font">' . $fonts . '</select></span><small>Plus Jakarta Sans et Inter sont chargées depuis Google Fonts.</small></label>'
         . '<label class="lwbd-field"><span>Groupe de produits mis en avant</span><span class="lwbd-input"><select name="featured_group">' . $groups . '</select></span><small>Abonnements et revenu mensuel affichés sous « Revenus par activité ».</small></label>'
         . '</div></section>';

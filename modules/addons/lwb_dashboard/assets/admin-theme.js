@@ -38,6 +38,13 @@
     $('.lwba-pagetitle', top).textContent = h1 ? h1.textContent.trim() : document.title.replace(/^WHMCS\s*-\s*/, '');
     var search = $('#intelliSearchForm');
     if (search) { top.appendChild(search); var si = $('input[type=text], input:not([type])', search); if (si && !si.placeholder) { si.placeholder = 'Rechercher un client, une facture, un domaine…'; } }
+    // Panneau des résultats aligné sous le champ de recherche.
+    if (search) {
+        var placeResults = function () { html.style.setProperty('--lwba-search-left', Math.round(search.getBoundingClientRect().left) + 'px'); };
+        placeResults();
+        window.addEventListener('resize', placeResults);
+        search.addEventListener('focusin', placeResults);
+    }
     var right = $('ul.right-nav', nav);
     if (right) {
         top.appendChild(right);

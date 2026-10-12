@@ -187,6 +187,14 @@ Les captures utilisent des données d'exemple.
 
 ## Historique
 
+- **2.1** :
+  - les factures groupées ne sont plus comptées en double dans les impayés ;
+  - l'alerte « crédit du registraire épuisé » disparaît dès qu'un domaine est enregistré ou renouvelé ;
+  - la barre de recherche est réparée pendant la saisie, et le panneau de résultats s'ouvre sous le champ, au design du thème ;
+  - la carte « Marque » affiche le code des couleurs et un aperçu du logo ;
+  - le bloc du groupe mis en avant est masqué quand il est vide ;
+  - l'ancien module FlexPay est regroupé avec le nouveau ;
+  - le widget précise l'alerte en cours, et les boutons « Reporter » sont plus lisibles.
 - **2.0** : utilisable sur n'importe quel WHMCS. Nom, logo, couleurs et police réglables (carte « Marque »). Montants dans la devise par défaut de WHMCS. Registraire détecté automatiquement. FlexPay facultatif. Groupe de produits mis en avant au choix. Option pour ne pas modifier `login.tpl`. Widget réservé aux rôles autorisés. Plus aucun chargement de Google Fonts écrit en dur.
 - **1.5** : finitions sur toute l'administration : menu « ⋯ » pour les actions de ligne, statuts en pastilles, montants alignés, fiche client modernisée, panneau de section masqué par défaut, traduction corrigée (ticket, Support…), pages d'erreur, listes vides et journal des paiements lisibles.
 - **1.4** : file « À faire » avec actions en un clic, centre de notifications, listes intelligentes (filtres, recherches enregistrées, colonnes, en-tête fixe, barre de sélection), actions mobiles et WhatsApp ; correction du bouton « + Facture » (jeton de sécurité manquant).
