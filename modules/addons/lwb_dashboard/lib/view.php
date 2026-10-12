@@ -12,14 +12,18 @@ function lwbd_e($v)
     return htmlspecialchars((string) $v, ENT_QUOTES, 'UTF-8');
 }
 
+/** Montant dans la devise par défaut de WHMCS, symbole après le nombre : « 482,61 USD ». */
 function lwbd_money($v, $decimals = 2)
 {
-    return number_format((float) $v, $decimals, ',', "\u{202F}") . "\u{00A0}$";
+    $sym = lwbd_currency_symbol();
+    return number_format((float) $v, $decimals, ',', "\u{202F}") . ($sym !== '' ? "\u{00A0}" . $sym : '');
 }
 
 function lwbd_short_money($v)
 {
-    return $v >= 1000 ? number_format($v / 1000, 1, ',', '') . "\u{00A0}k$" : number_format($v, 0, ',', "\u{202F}") . "\u{00A0}$";
+    $sym = lwbd_currency_symbol();
+    $sym = $sym !== '' ? "\u{00A0}" . $sym : '';
+    return $v >= 1000 ? number_format($v / 1000, 1, ',', '') . "\u{00A0}k" . $sym : number_format($v, 0, ',', "\u{202F}") . $sym;
 }
 
 function lwbd_date($date)
@@ -85,7 +89,7 @@ function lwbd_revenue_chart(array $series)
 {
     $w = 760;
     $h = 260;
-    $l = 52;
+    $l = 70;
     $r = 12;
     $t = 26;
     $b = 30;
@@ -296,7 +300,7 @@ function lwbd_render(array $d, $modulelink, array $opt = [])
     $maint = '';
     if ($d['maintenance']) {
         $mt = $d['maintenance'];
-        $maint = '<div class="lwbd-mini"><span class="lwbd-kpi-ic">' . lwbd_icon('tool') . '</span><div><b>Maintenance de site web</b><small>'
+        $maint = '<div class="lwbd-mini"><span class="lwbd-kpi-ic">' . lwbd_icon('tool') . '</span><div><b>' . lwbd_e($mt['name']) . '</b><small>'
             . $mt['active'] . ' abonnement(s) actif(s) · ' . $mt['pending'] . ' en attente de paiement · ' . lwbd_e(lwbd_money($mt['mrr'])) . ' par mois</small></div></div>';
     }
     $lateFees = $d['late_fees'] > 0 ? '<p class="lwbd-note">Pénalités de retard encaissées sur la période&nbsp;: <b>' . lwbd_e(lwbd_money($d['late_fees'])) . '</b></p>' : '';
@@ -354,8 +358,8 @@ function lwbd_render(array $d, $modulelink, array $opt = [])
         }
     }
 
-    $html = '<div class="lwbd" id="lwbd">'
-        . '<div class="lwbd-head"><div><p class="lwbd-eyebrow">LEWEBMAX · ' . lwbd_e(lwbd_date($d['today'])) . ' · <a href="index.php?lwbd=classic">Accueil WHMCS classique</a></p><h1>Tableau de bord</h1></div>' . $actions . '</div>'
+    $html = '<div class="lwbd" id="lwbd" data-slug="' . lwbd_e(lwbd_brand()['slug']) . '">'
+        . '<div class="lwbd-head"><div><p class="lwbd-eyebrow">' . lwbd_e(lwbd_brand_name()) . ' · ' . lwbd_e(lwbd_date($d['today'])) . ' · <a href="index.php?lwbd=classic">Accueil WHMCS classique</a></p><h1>Tableau de bord</h1></div>' . $actions . '</div>'
         . $flash
         . ($show('kpis') ? $kpis : '')
         . '<div class="lwbd-grid">' . $grid . '</div><div class="lwbd-tip" role="tooltip" hidden></div></div>';
@@ -400,7 +404,8 @@ function lwbd_health_html(array $h)
     $items[] = [$h['cron']['ok'] ? 'good' : 'critical', 'Cron WHMCS', $h['cron']['ok'] ? 'Dernier passage ' . lwbd_ago($h['cron']['minutes']) : 'Dernier passage ' . lwbd_ago($h['cron']['minutes']) . ' : relances et renouvellements à l\'arrêt', 'systemhealthandupdates.php'];
     $items[] = [$h['daily']['ok'] ? 'good' : 'critical', 'Tâches quotidiennes', 'Dernière exécution ' . lwbd_ago($h['daily']['minutes']), 'automationstatus.php'];
     if ($h['registrar']['no_credit']) {
-        $items[] = ['critical', 'Crédit du registraire épuisé', 'Porkbun refuse les enregistrements et renouvellements faute de crédit. Rechargez le compte Porkbun.', 'https://porkbun.com/account/credit'];
+        $reg = lwbd_main_registrar();
+        $items[] = ['critical', 'Crédit du registraire épuisé', 'Le registraire ' . $reg['name'] . ' refuse les enregistrements et renouvellements faute de crédit. Rechargez le compte.', $reg['url']];
     }
     $items[] = [$h['registrar']['count'] ? 'serious' : 'good', 'Opérations de domaines',
         $h['registrar']['count'] ? $h['registrar']['count'] . ' échec(s) d\'enregistrement ou de renouvellement sur 7 jours' : 'Aucun échec sur 7 jours', 'systemactivitylog.php'];
@@ -442,7 +447,7 @@ function lwbd_sections()
         'risks' => ['Domaines à surveiller', 'Période de grâce, payés non renouvelés, sans registraire.'],
         'health' => ['Santé du système', 'Cron, registraire, erreurs, résiliations.'],
         'categories' => ['Revenus par activité', 'Répartition par catégorie de produits.'],
-        'gateways' => ['Moyens de paiement', 'PayPal, FlexPay…'],
+        'gateways' => ['Moyens de paiement', 'Répartition des encaissements par passerelle.'],
         'orders' => ['Dernières commandes', 'Les 8 dernières commandes.'],
         'payments' => ['Derniers paiements', 'Les 8 derniers encaissements.'],
         'tickets' => ['Tickets à traiter', 'Tickets en attente de votre réponse.'],
@@ -458,8 +463,32 @@ function lwbd_switch($name, $checked, $label, $desc, $value = 'on')
 }
 
 /** Page « Réglages » du tableau de bord, dans le même design. */
+/** Carte « Marque » des réglages : nom, logo, couleurs, police, groupe mis en avant. */
+function lwbd_brand_fields(array $brand)
+{
+    $fonts = '';
+    foreach (['jakarta' => 'Plus Jakarta Sans', 'inter' => 'Inter', 'system' => 'Police du système (aucun chargement externe)'] as $k => $label) {
+        $fonts .= '<option value="' . $k . '"' . ($brand['brand_font'] === $k ? ' selected' : '') . '>' . lwbd_e($label) . '</option>';
+    }
+    $groups = '<option value="">Aucun</option>';
+    foreach (\WHMCS\Database\Capsule::table('tblproductgroups')->orderBy('order')->get(['id', 'name']) as $g) {
+        $groups .= '<option value="' . (int) $g->id . '"' . ((string) $g->id === (string) $brand['featured_group'] ? ' selected' : '') . '>' . lwbd_e($g->name) . '</option>';
+    }
+    $company = (string) \WHMCS\Config\Setting::getValue('CompanyName');
+    return '<section class="lwbd-card lwbd-set-wide"><header class="lwbd-set-h"><span class="lwbd-kpi-ic">' . lwbd_icon('target') . '</span><div><h2>Marque</h2><p>Votre nom, votre logo et vos couleurs, sur le tableau de bord, le thème et la page de connexion.</p></div></header>'
+        . '<div class="lwbd-brand-grid">'
+        . '<label class="lwbd-field"><span>Nom affiché</span><span class="lwbd-input"><input type="text" name="brand_name" maxlength="60" value="' . lwbd_e(lwbd_brand_raw('brand_name')) . '" placeholder="' . lwbd_e($company) . '"></span><small>Vide : le nom de la société dans WHMCS. Repris dans les messages WhatsApp.</small></label>'
+        . '<label class="lwbd-field"><span>Logo blanc (menu et connexion)</span><span class="lwbd-input"><input type="url" name="brand_logo" maxlength="300" value="' . lwbd_e($brand['brand_logo']) . '" placeholder="https://…/logo-blanc.png"></span><small>Vide : le logo d\'origine de WHMCS.</small></label>'
+        . '<label class="lwbd-field"><span>Couleur principale</span><span class="lwbd-input"><input type="color" name="brand_color" value="' . lwbd_e($brand['brand_color']) . '"></span></label>'
+        . '<label class="lwbd-field"><span>Couleur d\'accent</span><span class="lwbd-input"><input type="color" name="brand_accent" value="' . lwbd_e($brand['brand_accent']) . '"></span></label>'
+        . '<label class="lwbd-field"><span>Police</span><span class="lwbd-input"><select name="brand_font">' . $fonts . '</select></span><small>Plus Jakarta Sans et Inter sont chargées depuis Google Fonts.</small></label>'
+        . '<label class="lwbd-field"><span>Groupe de produits mis en avant</span><span class="lwbd-input"><select name="featured_group">' . $groups . '</select></span><small>Abonnements et revenu mensuel affichés sous « Revenus par activité ».</small></label>'
+        . '</div></section>';
+}
+
 function lwbd_settings_render(array $set, $modulelink, $token, $flash = null)
 {
+    $brand = lwbd_brand(true);
     $hidden = $set['hidden'];
     $period = (int) $set['period'];
     $seg = '';
@@ -482,7 +511,7 @@ function lwbd_settings_render(array $set, $modulelink, $token, $flash = null)
         . '<input type="hidden" name="lwbd_action" value="settings">'
         . '<div class="lwbd-set-grid">'
         . '<section class="lwbd-card"><header class="lwbd-set-h"><span class="lwbd-kpi-ic">' . lwbd_icon('target') . '</span><div><h2>Objectif et période</h2><p>Ce que vous visez chaque mois et la période des graphiques.</p></div></header>'
-        . '<label class="lwbd-field"><span>Objectif d\'encaissement mensuel</span><span class="lwbd-input"><input type="number" name="goal" min="0" step="10" inputmode="decimal" value="' . lwbd_e($set['goal']) . '" placeholder="Aucun"><em>$ / mois</em></span>'
+        . '<label class="lwbd-field"><span>Objectif d\'encaissement mensuel</span><span class="lwbd-input"><input type="number" name="goal" min="0" step="10" inputmode="decimal" value="' . lwbd_e($set['goal']) . '" placeholder="Aucun"><em>' . lwbd_e(lwbd_currency_symbol()) . ' / mois</em></span>'
         . '<small>Laissez vide pour masquer la jauge « Objectif du mois ».</small></label>'
         . '<div class="lwbd-field"><span>Période affichée à l\'ouverture</span><div class="lwbd-segs" role="radiogroup">' . $seg . '</div></div>'
         . '</section>'
@@ -490,9 +519,11 @@ function lwbd_settings_render(array $set, $modulelink, $token, $flash = null)
         . lwbd_switch('homepage', $set['homepage'] === 'on', 'Ouvrir le tableau de bord après la connexion', 'À la place de l\'accueil WHMCS. Le lien « Accueil WHMCS classique » reste disponible en haut du tableau de bord.')
         . '<div class="lwbd-set-note">' . lwbd_icon('lock') . '<span>Les administrateurs autorisés à voir le tableau de bord se choisissent dans WHMCS, rubrique <a href="configaddonmods.php#lwb_dashboard">Modules complémentaires</a>.</span></div>'
         . '</section>'
-        . '<section class="lwbd-card lwbd-set-wide"><header class="lwbd-set-h"><span class="lwbd-kpi-ic">' . lwbd_icon('brush') . '</span><div><h2>Thème de l\'administration</h2><p>Le design LEWEBMAX sur toutes les pages de WHMCS : menu latéral, barre de recherche, tableaux, formulaires et page de connexion.</p></div></header>'
-        . lwbd_switch('admin_theme', $set['admin_theme'] === 'on', 'Thème moderne LEWEBMAX pour toute l\'administration', 'Pour tous les administrateurs. Désactivez-le pour retrouver instantanément le thème WHMCS d\'origine.')
+        . '<section class="lwbd-card lwbd-set-wide"><header class="lwbd-set-h"><span class="lwbd-kpi-ic">' . lwbd_icon('brush') . '</span><div><h2>Thème de l\'administration</h2><p>Le thème Lwb-admin sur toutes les pages de WHMCS : menu latéral, barre de recherche, tableaux, formulaires et page de connexion.</p></div></header>'
+        . lwbd_switch('admin_theme', $set['admin_theme'] === 'on', 'Thème moderne pour toute l\'administration', 'Pour tous les administrateurs. Désactivez-le pour retrouver instantanément le thème WHMCS d\'origine.')
+        . lwbd_switch('login_theme', $brand['login_theme'] !== 'off', 'Habiller aussi la page de connexion', 'Ajoute une ligne dans le fichier login.tpl de WHMCS (remise automatiquement après une mise à jour). Décochez pour ne jamais toucher aux fichiers de WHMCS.')
         . '</section>'
+        . lwbd_brand_fields($brand)
         . '<section class="lwbd-card lwbd-set-wide"><header class="lwbd-set-h"><span class="lwbd-kpi-ic">' . lwbd_icon('eye') . '</span><div><h2>Sections affichées</h2><p>Masquez ce dont vous n\'avez pas besoin. Le graphique des encaissements reste toujours affiché.</p></div>'
         . '<span class="lwbd-tools"><button type="button" class="lwbd-mini-btn" data-check="all">Tout afficher</button></span></header>'
         . '<div class="lwbd-switch-grid">' . $sections . '</div></section>'
@@ -504,7 +535,8 @@ function lwbd_settings_render(array $set, $modulelink, $token, $flash = null)
 
 function lwbd_style()
 {
-    return '<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet"><style>' . file_get_contents(__DIR__ . '/../assets/dashboard.css') . '</style>';
+    // Sans le thème de l'administration, la marque (police, couleurs) n'est pas encore chargée.
+    return (lwbd_admin_theme_enabled() ? '' : lwbd_brand_style()) . '<style>' . file_get_contents(__DIR__ . '/../assets/dashboard.css') . '</style>';
 }
 
 function lwbd_script()

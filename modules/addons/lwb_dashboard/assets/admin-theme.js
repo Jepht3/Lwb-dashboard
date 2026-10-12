@@ -17,9 +17,9 @@
     var nav = $('.navigation');
     if (!nav) { html.classList.remove('lwba'); return; }
 
-    // Logo LEWEBMAX blanc.
+    // Logo blanc de la marque (réglages) ; sans logo, celui de WHMCS reste.
     var logo = $('a.logo img', nav);
-    if (logo && cfg.logo) { logo.src = cfg.logo; logo.alt = 'LEWEBMAX'; }
+    if (logo && cfg.logo) { logo.src = cfg.logo; logo.alt = cfg.name || ''; }
 
     // Bouton « Nouveau ».
     var add = $('.navbar-collapse > ul > li.bt:first-child > a', nav);
@@ -76,7 +76,8 @@
     // Pied du rail.
     var foot = document.createElement('div');
     foot.className = 'lwba-railfoot';
-    foot.innerHTML = 'LEWEBMAX · Administration<br><a href="' + (cfg.dashboard || 'addonmodules.php?module=lwb_dashboard') + '">Tableau de bord</a>';
+    foot.innerHTML = '<span></span><br><a href="' + (cfg.dashboard || 'addonmodules.php?module=lwb_dashboard') + '">Tableau de bord</a>';
+    foot.firstChild.textContent = (cfg.name ? cfg.name + ' · ' : '') + 'Administration';
     nav.appendChild(foot);
 
     // Menus du rail en accordéon.

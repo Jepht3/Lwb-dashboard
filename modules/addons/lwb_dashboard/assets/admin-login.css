@@ -1,14 +1,14 @@
-/* Lwb-admin : page de connexion de l'administration WHMCS aux couleurs de LEWEBMAX. */
+/* Lwb-admin : page de connexion de l'administration WHMCS. Logo, sous-titre, police et couleurs de la marque : brand-login.css (généré). */
 html body{min-height:100vh; margin:0; font-family:"Plus Jakarta Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif!important; color:#0d0d2b;
   background:radial-gradient(1200px 600px at 85% -10%,rgba(255,106,61,.28),transparent 60%),radial-gradient(900px 600px at -10% 110%,rgba(80,96,255,.35),transparent 60%),linear-gradient(160deg,#05087d 0%,#030673 50%,#02044f 100%)!important;
   display:flex; flex-direction:column; align-items:center; justify-content:center; gap:18px; padding:32px 16px!important}
 body *{font-family:inherit!important}
 .login-container{width:100%; max-width:430px!important; margin:0 auto!important; padding:0!important; margin-top:0!important}
 .login-container h1.logo{margin:0 0 26px!important; text-align:center}
-.login-container h1.logo img{content:url("https://lewebmax.com/wp-content/uploads/2023/01/288x80-blanc.png"); max-height:46px; width:auto; height:46px}
+.login-container h1.logo img{max-height:46px; width:auto; height:46px}
 .login-body{background:#fff!important; border:0!important; border-radius:22px 22px 0 0!important; padding:34px 34px 26px!important; box-shadow:0 30px 80px rgba(2,4,79,.45)!important}
 .login-body h2{font-size:26px!important; font-weight:800!important; letter-spacing:-.01em; text-transform:none!important; color:#0d0d2b!important; margin:0 0 6px!important}
-.login-body h2::after{content:"Espace d'administration LEWEBMAX"; display:block; margin-top:6px; font-size:13.5px; font-weight:500; color:#575b78; letter-spacing:0}
+.login-body h2::after{display:block; margin-top:6px; font-size:13.5px; font-weight:500; color:#575b78; letter-spacing:0}
 .login-body form{margin-top:22px}
 .login-body .form-control,.login-body input[type=text],.login-body input[type=password],.login-body input[type=email]{height:50px!important; border:1px solid #e2e5f2!important; border-radius:12px!important; padding:0 16px!important; font-size:15px!important; color:#0d0d2b!important; background:#f8f9fc!important; box-shadow:none!important; transition:border-color .15s,box-shadow .15s,background .15s}
 .login-body .form-control:focus,.login-body input:focus{background:#fff!important; border-color:#030673!important; box-shadow:0 0 0 4px rgba(3,6,115,.10)!important; outline:0}

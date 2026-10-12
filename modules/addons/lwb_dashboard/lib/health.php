@@ -54,7 +54,8 @@ function lwbd_health()
                 ->orWhere('description', 'like', 'Domain Transfer Failed%');
         })->orderBy('id', 'desc')->get(['date', 'description']);
     $noCredit = $registrar->first(function ($r) {
-        return stripos($r->description, 'INSUFFICIENT_FUNDS') !== false || stripos($r->description, 'credit is $0') !== false;
+        // Messages de manque de crédit des registraires courants (Porkbun, Namecheap, ResellerClub…).
+        return (bool) preg_match('/insufficient[_ ](funds|balance)|credit is \$0|not enough (funds|balance)|insufficient credit/i', $r->description);
     });
 
     $errors = Capsule::table('tblactivitylog')->where('date', '>=', $since)

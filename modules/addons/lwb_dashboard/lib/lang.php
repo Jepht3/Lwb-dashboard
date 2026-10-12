@@ -14,7 +14,7 @@ if (!defined('WHMCS')) {
 
 const LWBD_LANG_MARKER = 'Lwb-dashboard';
 
-/** Dossier de l'administration (kota/ chez LEWEBMAX), tel que configuré dans WHMCS. */
+/** Dossier de l'administration (renommé ou non), tel que configuré dans WHMCS. */
 function lwbd_admin_dir()
 {
     $dir = 'admin';

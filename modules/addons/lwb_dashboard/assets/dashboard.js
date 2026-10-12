@@ -42,7 +42,8 @@
         var blob = new Blob(['\ufeff' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
         var a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
-        a.download = 'lewebmax-' + (src.getAttribute('data-name') || 'export') + '-' + new Date().toISOString().slice(0, 10) + '.csv';
+        var root = document.getElementById('lwbd');
+        a.download = ((root && root.getAttribute('data-slug')) || 'lwb') + '-' +(src.getAttribute('data-name') || 'export') + '-' + new Date().toISOString().slice(0, 10) + '.csv';
         document.body.appendChild(a);
         a.click();
         setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500);

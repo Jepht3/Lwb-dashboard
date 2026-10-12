@@ -176,6 +176,11 @@ a.lwbd-kpi:hover{box-shadow:0 6px 18px rgba(13,13,43,.08); transform:translateY(
 .lwbd-switch:checked::after{transform:translateX(18px)}
 .lwbd-switch:focus-visible{outline:2px solid var(--brand); outline-offset:3px}
 .lwbd-switch-grid{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px}
+.lwbd-brand-grid{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:18px 16px}
+.lwbd-brand-grid .lwbd-field{margin:0}
+.lwbd-brand-grid .lwbd-input{max-width:none}
+.lwbd-brand-grid .lwbd-input input,.lwbd-brand-grid .lwbd-input select{flex:1; min-width:0; border:0; outline:0; background:transparent; font:600 14px inherit; font-family:inherit; color:var(--ink); padding:0; box-shadow:none; height:auto}
+.lwbd-brand-grid .lwbd-input input[type=color]{height:30px; padding:0; cursor:pointer}
 .lwbd-set-note{display:flex; gap:10px; align-items:flex-start; margin-top:14px; padding:12px 14px; border-radius:12px; background:var(--brand-50); font-size:12.5px; color:var(--ink-2)}
 .lwbd-set-note .lwbd-ic{width:18px; height:18px; color:var(--brand); margin-top:1px}
 .lwbd-savebar{position:sticky; bottom:0; z-index:5; display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-top:16px; padding:14px 18px; background:rgba(255,255,255,.92); backdrop-filter:blur(8px); border:1px solid var(--line); border-radius:14px; box-shadow:0 -6px 24px rgba(13,13,43,.06)}
@@ -184,9 +189,9 @@ a.lwbd-kpi:hover{box-shadow:0 6px 18px rgba(13,13,43,.08); transform:translateY(
 .lwbd-savebar button.lwbd-btn{cursor:pointer; font-family:inherit}
 
 @media (max-width:1199px){ .lwbd-kpis{grid-template-columns:repeat(2,minmax(0,1fr))} .span-4,.span-8{grid-column:span 12} }
-@media (max-width:1199px){ .lwbd-switch-grid{grid-template-columns:repeat(2,minmax(0,1fr))} }
+@media (max-width:1199px){ .lwbd-switch-grid,.lwbd-brand-grid{grid-template-columns:repeat(2,minmax(0,1fr))} }
 @media (max-width:767px){
-  .lwbd-set-grid,.lwbd-switch-grid{grid-template-columns:1fr}
+  .lwbd-set-grid,.lwbd-switch-grid,.lwbd-brand-grid{grid-template-columns:1fr}
   .lwbd-savebar > span{display:none}
   .lwbd-savebar > div{width:100%} .lwbd-savebar .lwbd-btn{flex:1; justify-content:center}
   .lwbd{margin:-10px -10px 0; padding:16px 12px 24px}

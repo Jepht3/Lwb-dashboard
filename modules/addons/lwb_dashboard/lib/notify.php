@@ -58,7 +58,8 @@ function lwbd_notifications($limit = 40)
         $sticky[] = ['t' => time(), 'type' => 'alert', 'icon' => 'fa-clock', 'title' => 'Le cron WHMCS ne tourne plus', 'text' => 'Dernier passage ' . lwbd_ago($h['cron']['minutes']), 'href' => 'automationstatus.php', 'level' => 'critical', 'sticky' => true];
     }
     if ($h['registrar']['no_credit']) {
-        $sticky[] = ['t' => time(), 'type' => 'alert', 'icon' => 'fa-wallet', 'title' => 'Crédit Porkbun épuisé', 'text' => 'Les enregistrements et renouvellements échouent.', 'href' => 'https://porkbun.com/account/credit', 'level' => 'critical', 'sticky' => true];
+        $reg = lwbd_main_registrar();
+        $sticky[] = ['t' => time(), 'type' => 'alert', 'icon' => 'fa-wallet', 'title' => 'Crédit ' . $reg['name'] . ' épuisé', 'text' => 'Les enregistrements et renouvellements échouent.', 'href' => $reg['url'], 'level' => 'critical', 'sticky' => true];
     }
     return ['now' => time(), 'sticky' => $sticky, 'events' => $ev, 'todo' => lwbd_todo_items(true)];
 }

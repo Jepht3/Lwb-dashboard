@@ -46,8 +46,8 @@ function lwbd_handle_actions()
     if (!$inv) {
         return ['danger', 'Facture introuvable ou déjà réglée.'];
     }
-    if (Capsule::schema()->hasTable('mod_lwm_reminders')
-        && Capsule::table('mod_lwm_reminders')->where('invoice_id', $id)->where('last_sent', date('Y-m-d'))->exists()) {
+    $reminders = lwbd_reminders_table();
+    if (Capsule::table($reminders)->where('invoice_id', $id)->where('last_sent', date('Y-m-d'))->exists()) {
         return ['warning', 'Une relance est déjà partie aujourd\'hui pour la facture n° ' . ($inv->invoicenum ?: $id) . '.'];
     }
     $template = lwbd_reminder_template(lwbd_days_between($inv->duedate, date('Y-m-d')));
@@ -55,10 +55,8 @@ function lwbd_handle_actions()
     if (($result['result'] ?? '') !== 'success') {
         return ['danger', 'Échec de l\'envoi : ' . ($result['message'] ?? 'erreur inconnue')];
     }
-    if (Capsule::schema()->hasTable('mod_lwm_reminders')) {
-        $row = Capsule::table('mod_lwm_reminders')->where('invoice_id', $id)->first();
-        Capsule::table('mod_lwm_reminders')->updateOrInsert(['invoice_id' => $id], ['last_sent' => date('Y-m-d'), 'count' => ($row->count ?? 0) + 1]);
-    }
+    $row = Capsule::table($reminders)->where('invoice_id', $id)->first();
+    Capsule::table($reminders)->updateOrInsert(['invoice_id' => $id], ['last_sent' => date('Y-m-d'), 'count' => ($row->count ?? 0) + 1]);
     logActivity('Lwb-dashboard : relance manuelle envoyée (' . $template . ') - Invoice ID: ' . $id);
     return ['success', 'Relance envoyée pour la facture n° ' . ($inv->invoicenum ?: $id) . '.'];
 }
@@ -66,10 +64,15 @@ function lwbd_handle_actions()
 /** Enregistre la page « Réglages » : objectif, période, page d'accueil, sections affichées. */
 function lwbd_save_settings(array $post)
 {
-    $goal = trim(str_replace([',', ' ', '$'], ['.', '', ''], (string) ($post['goal'] ?? '')));
+    $goal = str_replace(',', '.', preg_replace('/[^0-9.,]/', '', (string) ($post['goal'] ?? '')));
     if ($goal !== '' && (!is_numeric($goal) || (float) $goal < 0)) {
         return ['danger', 'L\'objectif doit être un montant positif, par exemple 500.'];
     }
+    $before = lwbd_brand(true);
+    if ($err = lwbd_brand_save($post)) {
+        return ['danger', $err];
+    }
+    $after = lwbd_brand();
     $period = (int) ($post['period'] ?? 12);
     if (!in_array($period, [6, 12, 24], true)) {
         $period = 12;
@@ -81,10 +84,16 @@ function lwbd_save_settings(array $post)
     lwbd_save_setting('homepage', !empty($post['homepage']) ? 'on' : '');
     lwbd_save_setting('hidden', implode(',', $hidden));
     $theme = !empty($post['admin_theme']) ? 'on' : '';
-    if ($theme !== lwbd_settings()['admin_theme']) {
+    $themeChanged = $theme !== lwbd_settings()['admin_theme'];
+    if ($themeChanged) {
         lwbd_save_setting('admin_theme', $theme);
-        lwbd_login_patch($theme === 'on');
         logActivity('Lwb-dashboard : thème moderne de l\'administration ' . ($theme === 'on' ? 'activé' : 'désactivé'));
+    }
+    // Page de connexion : feuille de la marque régénérée, ligne de login.tpl remise à jour si besoin.
+    lwbd_login_css_write();
+    if ($themeChanged || $before !== $after) {
+        lwbd_login_patch(false);
+        lwbd_login_patch($theme === 'on' && $after['login_theme'] !== 'off');
     }
     logActivity('Lwb-dashboard : réglages enregistrés');
     return ['success', 'Réglages enregistrés.'];

@@ -299,10 +299,12 @@ function lwbd_collect($months = 12)
                 'gateway' => $names[$p->gateway] ?? $p->gateway, 'invoice' => (int) $p->invoiceid];
         })->all();
 
-    // Abonnements de maintenance -----------------------------------------
-    $maintPids = Capsule::table('tblproducts as p')->join('tblproductgroups as g', 'g.id', '=', 'p.gid')
-        ->where('g.slug', 'maintenance-site-web')->pluck('p.id')->all();
+    // Groupe de produits mis en avant (réglage « Marque ») -----------------
+    $groupId = (int) lwbd_brand()['featured_group'];
+    $groupName = $groupId ? (string) Capsule::table('tblproductgroups')->where('id', $groupId)->value('name') : '';
+    $maintPids = $groupName !== '' ? Capsule::table('tblproducts')->where('gid', $groupId)->pluck('id')->all() : [];
     $d['maintenance'] = $maintPids ? [
+        'name' => $groupName,
         'active' => Capsule::table('tblhosting')->whereIn('packageid', $maintPids)->where('domainstatus', 'Active')->count(),
         'pending' => Capsule::table('tblhosting')->whereIn('packageid', $maintPids)->where('domainstatus', 'Pending')->count(),
         'mrr' => round((float) Capsule::table('tblhosting')->whereIn('packageid', $maintPids)->where('domainstatus', 'Active')
@@ -348,11 +350,10 @@ function lwbd_admin_theme_enabled()
     return $adminId && in_array($adminId, array_map('intval', explode(',', (string) ($rows['admin_theme_preview'] ?? ''))), true);
 }
 
-/** Chemin de login.tpl dans le dossier d'administration (renommé « kota » ici). */
+/** Chemin de login.tpl dans le dossier d'administration (qu'il soit renommé ou non). */
 function lwbd_login_tpl_path()
 {
-    $dir = !empty($GLOBALS['customadminpath']) ? $GLOBALS['customadminpath'] : 'admin';
-    return ROOTDIR . '/' . trim($dir, '/') . '/templates/login.tpl';
+    return lwbd_admin_dir() . '/templates/login.tpl';
 }
 
 /**
@@ -369,8 +370,12 @@ function lwbd_login_patch($enable)
     $marker = '<!-- lwb-admin-login -->';
     $has = strpos($tpl, $marker) !== false;
     if ($enable && !$has) {
-        $css = '../modules/addons/lwb_dashboard/assets/admin-login.css?v=' . @filemtime(__DIR__ . '/../assets/admin-login.css');
-        $line = $marker . '<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"><link href="' . $css . '" rel="stylesheet">';
+        $base = '../modules/addons/lwb_dashboard/assets/';
+        $line = $marker . '<link href="' . $base . 'admin-login.css?v=' . @filemtime(__DIR__ . '/../assets/admin-login.css') . '" rel="stylesheet">';
+        // Police, couleurs et logo de la marque (fichier généré depuis les réglages).
+        if (is_file(lwbd_login_css_path()) || lwbd_login_css_write()) {
+            $line .= '<link href="' . $base . 'brand-login.css?v=' . @filemtime(lwbd_login_css_path()) . '" rel="stylesheet">';
+        }
         $new = preg_replace('#(<link href="templates/login\.min\.css" rel="stylesheet">)#', "$1\n        " . $line, $tpl, 1, $count);
         if (!$count) {
             $new = preg_replace('#</head>#i', '    ' . $line . "\n</head>", $tpl, 1, $count);

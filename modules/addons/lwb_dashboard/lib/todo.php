@@ -50,13 +50,9 @@ function lwbd_wa_phone($phone, $country = 'CD')
 /** Lien de paiement sans connexion (FlexPay si actif, sinon la facture en ligne). */
 function lwbd_pay_link($invoiceId)
 {
-    $lib = ROOTDIR . '/modules/gateways/flexpay/lib/Gateway.php';
     try {
-        if (is_file($lib)) {
-            require_once $lib;
-            if (class_exists('\\FlexPayWhmcs\\Gateway') && \FlexPayWhmcs\Gateway::isActive()) {
-                return \FlexPayWhmcs\Gateway::guestPayUrl((int) $invoiceId, 2);
-            }
+        if (lwbd_flexpay_active()) {
+            return \FlexPayWhmcs\Gateway::guestPayUrl((int) $invoiceId, 2);
         }
     } catch (\Throwable $e) {
     }
@@ -82,10 +78,11 @@ function lwbd_wa_invoice($invoiceId)
     $link = lwbd_pay_link($inv->id);
     $num = $inv->invoicenum ?: $inv->id;
     $when = $late > 0 ? 'est en retard de ' . $late . ' jour' . ($late > 1 ? 's' : '') : ($late === 0 ? "arrive à échéance aujourd'hui" : 'arrive à échéance le ' . date('d/m/Y', strtotime($inv->duedate)));
+    $brand = lwbd_brand_name();
     $text = 'Bonjour ' . trim($inv->firstname) . ",\n"
-        . 'Votre facture LEWEBMAX n° ' . $num . ' de ' . number_format($balance, 2, ',', ' ') . ' $ ' . $when . ".\n"
-        . "Vous pouvez la régler en 1 minute par Mobile Money (M-Pesa, Orange Money, Airtel Money) :\n" . $link . "\n"
-        . 'Merci, l\'équipe LEWEBMAX';
+        . 'Votre facture ' . $brand . ' n° ' . $num . ' de ' . str_replace(["\u{202F}", "\u{00A0}"], ' ', lwbd_money($balance)) . ' ' . $when . ".\n"
+        . (lwbd_flexpay_active() ? "Vous pouvez la régler en 1 minute par Mobile Money (M-Pesa, Orange Money, Airtel Money) :\n" : "Vous pouvez la consulter et la régler en ligne :\n") . $link . "\n"
+        . 'Merci, l\'équipe ' . $brand;
     $phone = lwbd_wa_phone($inv->phonenumber, $inv->country);
     return [
         'phone' => $phone,
@@ -120,7 +117,8 @@ function lwbd_todo_items($countOnly = false)
         $add('system', 'sys:cron', ['level' => 'critical', 'title' => 'Le cron WHMCS ne tourne plus', 'meta' => 'Dernier passage ' . lwbd_ago($h['cron']['minutes']) . ' : factures, relances et renouvellements sont à l\'arrêt.', 'href' => 'automationstatus.php']);
     }
     if ($h['registrar']['no_credit']) {
-        $add('system', 'sys:credit', ['level' => 'critical', 'title' => 'Crédit Porkbun épuisé', 'meta' => 'Les enregistrements et renouvellements de domaines échouent. Rechargez le compte puis relancez les domaines concernés.', 'href' => 'https://porkbun.com/account/credit', 'external' => true]);
+        $reg = lwbd_main_registrar();
+        $add('system', 'sys:credit', ['level' => 'critical', 'title' => 'Crédit ' . $reg['name'] . ' épuisé', 'meta' => 'Les enregistrements et renouvellements de domaines échouent. Rechargez le compte puis relancez les domaines concernés.', 'href' => $reg['url'], 'external' => strpos($reg['url'], 'http') === 0]);
     }
 
     // Commandes à accepter.

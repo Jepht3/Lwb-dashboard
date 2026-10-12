@@ -1,12 +1,13 @@
 <?php
 /**
- * Lwb-dashboard — widget « LEWEBMAX en un coup d'œil » sur l'accueil de l'administration.
+ * Lwb-dashboard — thème de l'administration, notifications et widget « en un coup d'œil ».
  */
 
 if (!defined('WHMCS')) {
     die('Accès direct interdit.');
 }
 
+require_once __DIR__ . '/lib/brand.php';
 require_once __DIR__ . '/lib/data.php';
 require_once __DIR__ . '/lib/health.php';
 require_once __DIR__ . '/lib/view.php';
@@ -107,7 +108,9 @@ add_hook('AdminAreaHeadOutput', 1, function ($vars) {
         $v = @filemtime(__DIR__ . '/assets/admin-theme.css');
         if (lwbd_settings()['admin_theme'] === 'on' && empty($_SESSION['lwbd_login_checked'])) {
             // Après une mise à jour de WHMCS, login.tpl est remplacé : on remet la ligne du thème.
-            lwbd_login_patch(true);
+            if (lwbd_brand()['login_theme'] !== 'off') {
+                lwbd_login_patch(true);
+            }
             // Idem pour la traduction corrigée : recréée si absente ou plus ancienne que celle de WHMCS.
             $ov = lwbd_admin_dir() . '/lang/overrides/french.php';
             if (!is_file($ov) || @filemtime($ov) < @filemtime(lwbd_admin_dir() . '/lang/french.php')) {
@@ -117,7 +120,8 @@ add_hook('AdminAreaHeadOutput', 1, function ($vars) {
         }
         $allowed = lwbd_admin_allowed();
         $cfg = json_encode([
-            'logo' => 'https://lewebmax.com/wp-content/uploads/2023/01/288x80-blanc.png',
+            'logo' => lwbd_brand()['brand_logo'],
+            'name' => lwbd_brand_name(),
             'dashboard' => 'addonmodules.php?module=lwb_dashboard',
             'addLabel' => 'Nouveau',
             'tools' => $allowed,
@@ -126,8 +130,8 @@ add_hook('AdminAreaHeadOutput', 1, function ($vars) {
             'ajax' => 'addonmodules.php?module=lwb_dashboard&lwbd_ajax=',
         ], JSON_HEX_TAG | JSON_UNESCAPED_SLASHES);
         return '<script>document.documentElement.classList.add("lwba");window.LWBA=' . $cfg . ';</script>'
-            . '<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">'
-            . '<link href="' . $base . 'admin-theme.css?v=' . $v . '" rel="stylesheet">';
+            . '<link href="' . $base . 'admin-theme.css?v=' . $v . '" rel="stylesheet">'
+            . lwbd_brand_style();
     } catch (\Throwable $e) {
         return '';
     }
@@ -150,13 +154,18 @@ add_hook('AdminAreaFooterOutput', 1, function ($vars) {
 if (class_exists('\WHMCS\Module\AbstractWidget')) {
     class LwbDashboardWidget extends \WHMCS\Module\AbstractWidget
     {
-        protected $title = 'LEWEBMAX en un coup d\'œil';
+        protected $title = 'En un coup d\'œil';
         protected $description = 'Encaissements, impayés, renouvellements et domaines à risque.';
         protected $weight = 5;
         protected $columns = 1;
         protected $cache = true;
         protected $cacheExpiry = 300;
         protected $requiredPermission = '';
+
+        public function getTitle()
+        {
+            return lwbd_brand_name() . ' en un coup d\'œil';
+        }
 
         public function getData()
         {
@@ -185,7 +194,7 @@ if (class_exists('\WHMCS\Module\AbstractWidget')) {
                     . '<div style="font-size:18px;font-weight:800;color:' . ($alert ? '#b42318' : '#0d0d2b') . ';white-space:nowrap">' . lwbd_e($value) . '</div></div>';
             };
             $alert = $data['alerts'] ? '<a href="addonmodules.php?module=lwb_dashboard" style="display:block;margin-bottom:8px;padding:9px 12px;border-radius:10px;background:#fdecec;color:#b42318;font-weight:700;text-decoration:none">⚠ ' . (int) $data['alerts'] . ' alerte(s) urgente(s) : cron ou crédit du registraire</a>' : '';
-            return '<div style="padding:12px;font-family:\'Plus Jakarta Sans\',-apple-system,Segoe UI,Arial,sans-serif">' . $alert
+            return '<div style="padding:12px;font-family:var(--a-font,inherit)">' . $alert
                 . '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'
                 . $cell('Encaissé ce mois', lwbd_money($data['month']))
                 . $cell('Revenu récurrent / mois', lwbd_money($data['mrr']))
@@ -197,7 +206,13 @@ if (class_exists('\WHMCS\Module\AbstractWidget')) {
         }
     }
 
-    add_hook('AdminHomeWidgets', 1, function () {
-        return new LwbDashboardWidget();
-    });
+    // Chiffres financiers : le widget n'est proposé qu'aux rôles autorisés à voir l'extension.
+    try {
+        if (defined('ADMINAREA') && lwbd_admin_allowed()) {
+            add_hook('AdminHomeWidgets', 1, function () {
+                return new LwbDashboardWidget();
+            });
+        }
+    } catch (\Throwable $e) {
+    }
 }
