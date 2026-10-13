@@ -32,6 +32,8 @@ body *{font-family:inherit!important}
 .poweredby{color:rgba(255,255,255,.55)!important; font-size:12px}
 .poweredby a{color:rgba(255,255,255,.75)!important}
 @media (max-width:480px){ .login-body{padding:26px 22px 20px!important} .login-container .footer{padding:12px 22px!important} }
+/* iPhone : un champ sous 16 px fait zoomer Safari au toucher. */
+@media (max-width:767px){ .login-body .form-control,.login-body input[type=text],.login-body input[type=password],.login-body input[type=email]{font-size:16px!important} }
 .login-body .row{display:flex; flex-direction:column; gap:10px; margin:0!important}
 .login-body .row > [class*=col-]{width:100%!important; float:none!important; padding:0!important}
 .login-body .checkbox{margin:2px 0 4px!important}
