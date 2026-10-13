@@ -481,3 +481,16 @@ html.lwba .listtable,html.lwba .dataTables_wrapper,html.lwba .table-responsive{m
   html.lwba #contentarea .input-group{max-width:100%}
   html.lwba #contentarea .btn{white-space:normal}
 }
+/* Fiche client : le menu « ≡ » des onglets cachés (Factures, Moyens de paiement, Courriels…)
+   s'ouvrait hors de l'écran à gauche. Sur téléphone il s'ouvre sous le bouton, sur deux colonnes. */
+@media (max-width:767px){
+  html.lwba .client-tabs .tabdrop{position:relative}
+  html.lwba .client-tabs .tabdrop > a::before{content:"Onglets"; font-weight:700; margin-right:4px}
+  html.lwba .client-tabs .tabdrop .dropdown-menu{left:0!important; right:auto!important; width:calc(100vw - 32px); max-width:420px; padding:6px!important}
+  html.lwba .client-tabs .tabdrop.open .dropdown-menu{display:grid; grid-template-columns:1fr 1fr; gap:2px}
+  html.lwba .client-tabs .tabdrop .dropdown-menu > li > a{white-space:normal; padding:10px 12px!important; border-radius:8px}
+  html.lwba .client-tabs .tabdrop .dropdown-menu > li.active > a{background:var(--a-brand50); color:var(--a-brand)!important}
+  /* Autres menus déroulants (commandes du module…) : jamais plus larges que l'écran. */
+  html.lwba #contentarea .dropdown-menu{max-width:calc(100vw - 40px)}
+  html.lwba #contentarea .dropdown-menu > li > a,html.lwba #contentarea .dropdown-menu .dropdown-item{white-space:normal}
+}

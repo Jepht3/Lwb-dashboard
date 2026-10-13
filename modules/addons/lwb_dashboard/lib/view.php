@@ -351,12 +351,12 @@ function lwbd_render(array $d, $modulelink, array $opt = [])
             if ($key === 'chart' || $show($key)) {
                 $html = $make();
                 if ($html !== '') {
-                    $cards[] = [$span, $html];
+                    $cards[] = [$key, $span, $html];
                 }
             }
         }
-        foreach ($cards as [$span, $html]) {
-            $grid .= preg_replace('/^<section class="lwbd-card /', '<section class="lwbd-card ' . (count($cards) === 1 ? 'span-12' : $span) . ' ', $html, 1);
+        foreach ($cards as [$key, $span, $html]) {
+            $grid .= preg_replace('/^<section class="lwbd-card /', '<section data-card="' . $key . '" class="lwbd-card ' . (count($cards) === 1 ? 'span-12' : $span) . ' ', $html, 1);
         }
     }
 

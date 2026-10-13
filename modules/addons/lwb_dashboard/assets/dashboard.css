@@ -260,3 +260,30 @@ a.lwbd-kpi:hover{box-shadow:0 6px 18px rgba(13,13,43,.08); transform:translateY(
   .lwbd-todo-acts .lwbd-act-btn:not(.ghost){width:100%; justify-content:center; height:44px; font-size:13.5px}
   .lwbd-todo-snooze{flex-basis:100%; border-left:0; padding-left:0; justify-content:flex-end}
 }
+
+/* ======================================================================
+ * v2.2 — téléphone et tablette : rien ne défile sur le côté.
+ * ====================================================================== */
+/* Le graphique se redimensionne au lieu d'exiger 560 px. */
+.lwbd-chart{min-width:0}
+@media (max-width:991px){ .span-6{grid-column:span 12} }
+@media (max-width:767px){
+  /* Textes du graphique agrandis : le SVG est réduit d'environ moitié sur un téléphone. */
+  .lwbd-chart .lwbd-axis{font-size:17px}
+  .lwbd-chart .lwbd-val{font-size:17px}
+}
+/* Tableaux en fiches : chaque ligne devient un bloc, plus de colonnes coupées. */
+@media (max-width:575.98px){
+  .lwbd-scroll{overflow:visible; margin:0}
+  .lwbd-scroll .lwbd-table thead{display:none}
+  .lwbd-scroll .lwbd-table,.lwbd-scroll .lwbd-table tbody{display:block; width:100%}
+  .lwbd-scroll .lwbd-table tr{display:flex; flex-wrap:wrap; align-items:center; gap:6px 10px; padding:11px 0; border-bottom:1px solid var(--line-soft)}
+  .lwbd-scroll .lwbd-table tr[hidden]{display:none}
+  .lwbd-scroll .lwbd-table tr:last-child{border-bottom:0}
+  .lwbd-scroll .lwbd-table td{display:block; padding:0!important; border:0!important; background:none!important}
+  .lwbd-scroll .lwbd-table td.num{margin-left:auto; font-weight:800}
+  .lwbd-scroll .lwbd-table td small{display:inline; margin:0 0 0 6px}
+  /* Le libellé (service, client) passe en tête de la fiche, sur toute la largeur. */
+  #lwbd-t-renew td:nth-child(2),.lwbd-card[data-card="orders"] td:nth-child(2),.lwbd-card[data-card="payments"] td:nth-child(2){order:-1; flex:1 1 100%; font-weight:700}
+  #lwbd-t-renew td:nth-child(2) small,.lwbd-card[data-card="payments"] td:nth-child(2) small{display:block; margin:2px 0 0; font-weight:400}
+}
