@@ -455,3 +455,27 @@ html.lwba #modalFeatureHighlights .modal-content{border-radius:18px!important; o
 html.lwba table.datatable td:has(> a.view-detail),html.lwba table.datatable td:has(> a > img[src$="delete.gif"]):last-child{width:1%; padding:4px 8px!important; white-space:nowrap}
 html.lwba table.datatable a.view-detail{display:inline-flex; align-items:center; justify-content:center; width:28px; height:28px; border-radius:8px; color:var(--a-ink3)!important}
 html.lwba table.datatable a.view-detail:hover{background:var(--a-brand50); color:var(--a-brand)!important}
+
+/* ======================================================================
+ * v2.2 — téléphone : plus rien ne déborde de la page.
+ * Les tableaux défilent dans leur cadre, les formulaires s'empilent.
+ * ====================================================================== */
+html.lwba #contentarea img{max-width:100%; height:auto}
+html.lwba .listtable,html.lwba .dataTables_wrapper,html.lwba .table-responsive{max-width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch}
+@media (max-width:991px){
+  html.lwba .lwbd{margin:-18px -14px 0!important; padding:18px 14px 30px!important}
+}
+@media (max-width:767px){
+  /* Barre des listes (factures, commandes, tickets) */
+  html.lwba .lwba-listbar > *{min-width:0; max-width:100%}
+  html.lwba .lwba-listtools{flex-wrap:wrap}
+  html.lwba .lwba-listtools > *{min-width:0; max-width:100%}
+  html.lwba .lwba-listtools input{flex:1 1 140px; width:auto!important; min-width:0}
+  /* Formulaires « libellé | champ » : le libellé passe au-dessus du champ */
+  html.lwba table.form,html.lwba table.form > tbody,html.lwba table.form > tbody > tr,html.lwba table.form > tbody > tr > td{display:block; width:100%!important; box-sizing:border-box}
+  html.lwba table.form td.fieldlabel{border-bottom:0!important; padding:10px 12px 4px!important; text-align:left!important}
+  html.lwba table.form td.fieldarea{overflow-x:auto}
+  html.lwba #contentarea input.form-control,html.lwba #contentarea select,html.lwba #contentarea textarea,html.lwba #contentarea .selectize-control{max-width:100%}
+  html.lwba #contentarea .input-group{max-width:100%}
+  html.lwba #contentarea .btn{white-space:normal}
+}

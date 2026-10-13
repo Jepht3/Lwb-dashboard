@@ -31,7 +31,7 @@ function lwb_dashboard_config()
     return [
         'name' => 'LWB Admin',
         'description' => 'Tableau de bord et thème moderne de l\'administration : encaissements, revenu récurrent, impayés, renouvellements, domaines à risque, file « À faire » et notifications. Marque, couleurs et police réglables.',
-        'version' => '2.1',
+        'version' => '2.2',
         'author' => 'LEWEBMAX Admin',
         // Les réglages se font sur la page « Réglages » du tableau de bord, dans le même design.
         'fields' => [],
