@@ -204,12 +204,20 @@ function lwbd_admin_logins()
     $recent = date('Y-m-d H:i:s', strtotime('-14 days'));
     foreach ($rows as $r) {
         $g = $geo[$r->ipaddress] ?? null;
-        $key = lwbd_location_key($r->ipaddress, $g['code'] ?? null);
+        // Un lieu est connu si son pays OU son réseau a déjà servi (le pays n'est pas toujours connu).
+        $keys = array_unique(array_filter([lwbd_location_key($r->ipaddress), !empty($g['code']) ? lwbd_location_key($r->ipaddress, $g['code']) : null]));
         $user = (string) $r->adminusername;
-        if ($r->logintime >= $recent && !empty($seen[$user]) && !isset($seen[$user][$key])) {
-            $new[] = ['id' => (int) $r->id, 'admin' => $user, 'ip' => $r->ipaddress, 'time' => $r->logintime, 'where' => $g['label'] ?? 'réseau ' . substr($key, strpos($key, ':') + 1) . '.x.x'];
+        $known = false;
+        foreach ($keys as $k) {
+            $known = $known || isset($seen[$user][$k]);
         }
-        $seen[$user][$key] = true;
+        if ($r->logintime >= $recent && !empty($seen[$user]) && !$known) {
+            $net = lwbd_location_key($r->ipaddress);
+            $new[] = ['id' => (int) $r->id, 'admin' => $user, 'ip' => $r->ipaddress, 'time' => $r->logintime, 'where' => $g['label'] ?? 'réseau ' . substr($net, strpos($net, ':') + 1) . (strpos($net, 'net:') === 0 ? '.x.x' : '::')];
+        }
+        foreach ($keys as $k) {
+            $seen[$user][$k] = true;
+        }
     }
     $failedRows = Capsule::table('tblactivitylog')->where('date', '>=', date('Y-m-d H:i:s', strtotime('-7 days')))
         ->where('description', 'like', 'Failed Admin Login%')->orderBy('id', 'desc')->get(['date', 'description'])->all();
