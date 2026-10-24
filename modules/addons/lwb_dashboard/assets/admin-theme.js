@@ -66,18 +66,44 @@
     });
     back.addEventListener('click', function () { html.classList.remove('lwba-nav-open'); });
 
-    // Entrée « Configuration » dans le rail (les réglages WHMCS n'y figuraient pas).
-    var wrench = right ? $$('a', right).filter(function (a) { return /fa-wrench/.test(a.innerHTML); })[0] : null;
+    // Entrée « Configuration » dans le rail : menu dépliant avec tous les réglages WHMCS.
     var mainUl = $('.navbar-collapse > ul:not(.right-nav)', nav);
-    if (wrench && mainUl) {
+    if (mainUl && !$('.lwba-rail-setup', mainUl)) {
         var li = document.createElement('li');
-        li.className = 'lwba-rail-setup';
-        li.innerHTML = '<a href="' + wrench.getAttribute('href') + '"><i class="fas fa-cog"></i>Configuration</a>';
+        li.className = 'has-dropdown lwba-rail-setup';
+        var head = document.createElement('a');
+        head.href = '#';
+        head.innerHTML = '<i class="fas fa-cog"></i>Configuration';
+        li.appendChild(head);
+        var sub = document.createElement('ul');
+        (cfg.setup || []).forEach(function (group) {
+            var g = document.createElement('li');
+            g.className = 'lwba-railgroup';
+            g.textContent = group[0];
+            sub.appendChild(g);
+            group[1].forEach(function (item) {
+                var it = document.createElement('li');
+                var a = document.createElement('a');
+                a.href = item[1];
+                a.textContent = item[0];
+                it.appendChild(a);
+                sub.appendChild(it);
+            });
+        });
+        if (!sub.children.length) {
+            sub.innerHTML = '<li><a href="configgeneral.php">Paramètres généraux</a></li><li><a href="configapplinks.php">Liens d\'application (cPanel)</a></li>';
+        }
+        li.appendChild(sub);
         mainUl.appendChild(li);
         var page = location.pathname.split('/').pop();
-        if (/^config|^systemadmin|^systemhealth/.test(page) || /rp=\/[^/]+\/setup/.test(location.search)) {
-            li.classList.add('lwba-current');
+        if (/^config|^systemadmin|^systemhealth|^marketconnect/.test(page) || /rp=\/[^\/]+\/(setup|apps)/.test(location.search)) {
+            li.classList.add('lwba-current', 'lwba-open');
         }
+    }
+
+    // Sous-menu de la clé à molette (barre du haut) : il était masqué par le thème.
+    if (right) {
+        $$('ul.drop-icons', right).forEach(function (u) { u.classList.add('lwba-drop'); u.classList.remove('drop-icons'); });
     }
 
     // Pied du rail.

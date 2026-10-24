@@ -28,6 +28,73 @@ function lwbd_admin_allowed()
     return in_array($role, array_map('intval', explode(',', lwbd_settings()['access'])), true);
 }
 
+/** Menu « Configuration » du rail : tous les réglages WHMCS, groupés (WHMCS vérifie les droits sur chaque page). */
+function lwbd_setup_menu()
+{
+    $r = function ($name, $fallback) {
+        try {
+            return function_exists('routePath') ? (string) routePath($name) : $fallback;
+        } catch (\Throwable $e) {
+            return $fallback;
+        }
+    };
+    return [
+        ['Réglages', [
+            ['Paramètres système', $r('admin-setup-index', 'configgeneral.php')],
+            ['Paramètres généraux', 'configgeneral.php'],
+            ['Applications et intégrations', $r('admin-apps-index', 'configaddonmods.php')],
+            ['Intégrations de connexion', $r('admin-setup-authn-view', 'configgeneral.php')],
+            ['Automatisation', 'configauto.php'],
+            ['MarketConnect', 'marketconnect.php'],
+            ['Notifications', $r('admin-setup-notifications-overview', 'configgeneral.php')],
+            ['Stockage', $r('admin-setup-storage-index', 'configgeneral.php')],
+            ['Liens d\'application (cPanel)', 'configapplinks.php'],
+            ['OpenID Connect', 'configopenid.php'],
+            ['Modèles d\'e-mails', 'configemailtemplates.php'],
+            ['Modules complémentaires', 'configaddonmods.php'],
+            ['Groupes de clients', 'configclientgroups.php'],
+            ['Champs personnalisés', 'configcustomfields.php'],
+            ['Anti-fraude', 'configfraud.php'],
+        ]],
+        ['Équipe', [
+            ['Administrateurs', 'configadmins.php'],
+            ['Rôles', 'configadminroles.php'],
+            ['Double authentification', 'configtwofa.php'],
+            ['Identifiants API', 'configapicredentials.php'],
+        ]],
+        ['Paiements', [
+            ['Devises', 'configcurrencies.php'],
+            ['Passerelles de paiement', 'configgateways.php'],
+            ['Taxes', $r('admin-setup-payments-tax-index', 'configtax.php')],
+            ['Promotions', 'configpromotions.php'],
+        ]],
+        ['Produits', [
+            ['Produits et services', 'configproducts.php'],
+            ['Options configurables', 'configproductoptions.php'],
+            ['Options de produits (addons)', 'configaddons.php'],
+            ['Packs', 'configbundles.php'],
+            ['Tarifs des domaines', 'configdomains.php'],
+            ['Registrars', 'configregistrars.php'],
+            ['Serveurs', 'configservers.php'],
+        ]],
+        ['Support', [
+            ['Départements', 'configticketdepartments.php'],
+            ['Statuts des tickets', 'configticketstatuses.php'],
+            ['Règles d\'escalade', 'configticketescalations.php'],
+            ['Anti-spam', 'configticketspamcontrol.php'],
+        ]],
+        ['Autres', [
+            ['Statuts des commandes', 'configorderstatuses.php'],
+            ['Questions de sécurité', 'configsecurityqs.php'],
+            ['IP bannies', 'configbannedips.php'],
+            ['E-mails bannis', 'configbannedemails.php'],
+            ['Sauvegardes', 'configbackups.php'],
+            ['Santé et mises à jour', 'systemhealthandupdates.php'],
+            ['Assistant de configuration', $r('admin-getting-started-index', 'configgeneral.php')],
+        ]],
+    ];
+}
+
 /** Nombre d'éléments « À faire », gardé 60 s en session pour ne pas recalculer à chaque page. */
 function lwbd_todo_count_cached()
 {
@@ -128,6 +195,7 @@ add_hook('AdminAreaHeadOutput', 1, function ($vars) {
             'todoUrl' => 'addonmodules.php?module=lwb_dashboard&view=todo',
             'todo' => $allowed ? lwbd_todo_count_cached() : 0,
             'ajax' => 'addonmodules.php?module=lwb_dashboard&lwbd_ajax=',
+            'setup' => lwbd_setup_menu(),
         ], JSON_HEX_TAG | JSON_UNESCAPED_SLASHES);
         return '<script>document.documentElement.classList.add("lwba");window.LWBA=' . $cfg . ';</script>'
             . '<link href="' . $base . 'admin-theme.css?v=' . $v . '" rel="stylesheet">'

@@ -494,3 +494,10 @@ html.lwba .listtable,html.lwba .dataTables_wrapper,html.lwba .table-responsive{m
   html.lwba #contentarea .dropdown-menu{max-width:calc(100vw - 40px)}
   html.lwba #contentarea .dropdown-menu > li > a,html.lwba #contentarea .dropdown-menu .dropdown-item{white-space:normal}
 }
+
+
+/* Menu Configuration du rail (v1.6) */
+html.lwba .navigation .lwba-rail-setup > ul{max-height:60vh; overflow-y:auto}
+html.lwba .navigation .lwba-rail-setup li.lwba-railgroup{padding:10px 12px 3px 42px; font-size:10.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:rgba(255,255,255,.42); list-style:none}
+html.lwba .navigation .lwba-rail-setup li.lwba-railgroup:first-child{padding-top:4px}
+html.lwba .lwba-topbar ul.right-nav ul.lwba-drop .ico-container{display:inline-flex; width:20px; justify-content:center; color:var(--a-brand)}
