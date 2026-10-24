@@ -1,0 +1,77 @@
+<div class="lwm-ans" style="margin:0 0 1.6em;padding:1.1em 1.3em;border-left:4px solid #030673;background:#f5f8ff;border-radius:12px"><p style="margin:0"><strong>En bref :</strong> pour migrer vers Google Workspace sans perdre d'e-mails, on crée d'abord les comptes Google, on copie les anciens messages avec le service de migration de Google (connexion IMAP), puis seulement on bascule les enregistrements MX. Une dernière synchronisation récupère les messages arrivés entre-temps. Bien faite, la migration se fait sans coupure de réception.</p></div>
+
+<p>La peur de perdre des années d'e-mails empêche beaucoup d'entreprises congolaises de quitter une vieille messagerie, qu'elle soit hébergée sur cPanel, chez un ancien prestataire ou sur des adresses Gmail gratuites éparpillées. Pourtant, avec la bonne méthode, la migration vers Google Workspace se fait sans perte et sans interruption. Voici la procédure que nous appliquons chez LE WEB MAX.</p>
+
+<h2>Ce qu'on peut migrer (et ce qu'on ne peut pas)</h2>
+<figure class="wp-block-table"><table>
+<thead><tr><th>Élément</th><th>Migrable ?</th><th>Comment</th></tr></thead>
+<tbody>
+<tr><td>E-mails et dossiers</td><td>Oui</td><td>Service de migration de données de Google (IMAP)</td></tr>
+<tr><td>Contacts</td><td>Oui</td><td>Export en fichier CSV ou vCard, puis import dans Google Contacts</td></tr>
+<tr><td>Agendas</td><td>Oui</td><td>Export en fichier .ics, puis import dans Google Agenda</td></tr>
+<tr><td>Signatures, filtres, réponses automatiques</td><td>Non</td><td>À recréer dans Gmail (quelques minutes par utilisateur)</td></tr>
+<tr><td>Mots de passe</td><td>Non</td><td>Chaque utilisateur reçoit un nouveau mot de passe Google</td></tr>
+</tbody>
+</table></figure>
+
+<h2>Étape 1 : faire l'inventaire</h2>
+<p>Avant de toucher à quoi que ce soit, listez :</p>
+<ul>
+<li>toutes les adresses existantes, avec la personne qui les utilise ;</li>
+<li>la taille de chaque boîte (visible dans cPanel ou chez votre ancien fournisseur) ;</li>
+<li>les adresses qui ne sont que des redirections ou des alias ;</li>
+<li>les boîtes des anciens employés à conserver pour archive.</li>
+</ul>
+<p>C'est souvent l'occasion de faire le ménage : une boîte inutilisée depuis deux ans n'a pas besoin d'une licence Google à 10 $ par mois, elle peut devenir un simple alias.</p>
+
+<h2>Étape 2 : créer les comptes Google Workspace</h2>
+<p>On vérifie le domaine auprès de Google avec un enregistrement TXT, puis on crée chaque utilisateur. <strong>À ce stade, on ne touche pas encore aux MX</strong> : les e-mails continuent d'arriver dans l'ancienne messagerie, rien n'est interrompu.</p>
+
+<h2>Étape 3 : copier les anciens e-mails</h2>
+<p>Dans la console d'administration de Google, le <strong>service de migration de données</strong> se connecte à l'ancien serveur en IMAP et copie, pour chaque utilisateur, ses e-mails et ses dossiers. Il faut fournir :</p>
+<ul>
+<li>l'adresse du serveur IMAP de l'ancienne messagerie (par exemple <em>mail.votre-domaine.cd</em>) ;</li>
+<li>pour chaque boîte, l'adresse source, la boîte Google de destination et le mot de passe source.</li>
+</ul>
+<p>La copie peut prendre de quelques minutes à plusieurs heures selon le volume et la qualité de la connexion du serveur source. Les grosses boîtes (plusieurs Go) sont copiées pendant la nuit.</p>
+<p><strong>Cas des adresses Gmail gratuites :</strong> si vos employés utilisaient des adresses @gmail.com personnelles, la migration se fait de la même manière, à condition que chacun autorise l'accès à sa boîte, ou exporte ses données avec Google Takeout.</p>
+
+<h2>Étape 4 : basculer les MX</h2>
+<p>Une fois la copie terminée, on remplace les anciens enregistrements MX par celui de Google (<code>smtp.google.com</code>) et on ajoute SPF, DKIM et DMARC. À partir de là, les nouveaux e-mails arrivent dans Gmail.</p>
+<p>Conseil : faites la bascule en fin de journée ou le week-end, et réduisez à l'avance la durée de mise en cache (TTL) des enregistrements DNS. Pendant quelques heures, certains messages peuvent encore arriver sur l'ancien serveur : c'est normal, l'étape suivante les récupère.</p>
+
+<h2>Étape 5 : la synchronisation finale</h2>
+<p>24 à 48 heures après la bascule, on relance une migration pour récupérer les messages arrivés sur l'ancien serveur pendant la propagation DNS. Les e-mails déjà copiés ne sont pas dupliqués.</p>
+
+<div class="lwm-cta" style="margin:2em 0;padding:1.5em;border-radius:14px;background:linear-gradient(135deg,#0b2a6f,#1f5eff);color:#fff"><p style="margin:0 0 .4em;font-size:1.25em;color:#fff"><strong>Nous migrons vos e-mails pour vous, gratuitement</strong></p><p style="margin:0 0 1em;color:#e8eeff">Avec chaque abonnement Google Workspace LE WEB MAX : inventaire, copie des e-mails, bascule des MX et synchronisation finale. 10 $ par adresse et par mois, payable en Mobile Money.</p><a href="https://lewebmax.com/service/email-hosting/#google-workspace" style="display:inline-block;background:#fff;color:#0b2a6f;font-weight:700;padding:.7em 1.2em;border-radius:10px;text-decoration:none">Découvrir l'offre Google Workspace</a></div>
+
+<h2>Étape 6 : contacts, agendas et réglages</h2>
+<ul>
+<li><strong>Contacts :</strong> exportez-les depuis l'ancien webmail ou depuis Outlook au format CSV, puis importez-les dans Google Contacts.</li>
+<li><strong>Agendas :</strong> exportez au format .ics, puis importez dans Google Agenda.</li>
+<li><strong>Téléphones :</strong> supprimez l'ancien compte de l'application e-mail et ajoutez le compte Google dans l'application Gmail.</li>
+<li><strong>Signatures et réponses automatiques :</strong> recréez-les dans les paramètres de Gmail.</li>
+</ul>
+
+<h2>Étape 7 : garder l'ancienne messagerie quelques semaines</h2>
+<p>Ne résiliez pas l'ancienne messagerie le jour même. Gardez-la au moins deux à quatre semaines, le temps de vérifier avec chaque utilisateur que rien ne manque. Ensuite seulement, vous pouvez la supprimer.</p>
+
+<h2>Les erreurs qui font perdre des e-mails</h2>
+<ol>
+<li>Changer les MX avant d'avoir créé les comptes Google : les e-mails reçus sont refusés.</li>
+<li>Supprimer l'ancienne messagerie juste après la bascule : on perd les messages arrivés pendant la propagation DNS.</li>
+<li>Oublier une boîte dans l'inventaire : son contenu disparaît avec l'ancien hébergement.</li>
+<li>Négliger SPF et DKIM : les e-mails envoyés depuis Google arrivent en spam chez vos clients.</li>
+</ol>
+
+<p>Pour la configuration des enregistrements DNS, voir notre guide <a href="https://lewebmax.com/adresse-gmail-professionnelle-nom-de-domaine-kinshasa/">créer une adresse Gmail professionnelle à votre nom de domaine</a>. Pour le choix de la solution, lisez <a href="https://lewebmax.com/google-workspace-ou-email-cpanel-rdc/">Google Workspace ou e-mails cPanel</a>.</p>
+
+<h2>Questions fréquentes</h2>
+<h3>Vais-je perdre des e-mails pendant la migration ?</h3>
+<p>Non, si l'ordre est respecté : comptes Google créés, e-mails copiés, MX basculés, puis synchronisation finale. Les messages arrivés pendant la bascule sont récupérés à la dernière étape.</p>
+<h3>Combien de temps dure une migration vers Google Workspace ?</h3>
+<p>Pour une PME de quelques utilisateurs, la copie prend en général quelques heures, puis on attend un à deux jours pour la synchronisation finale. Le volume des boîtes et la vitesse du serveur d'origine font varier la durée.</p>
+<h3>La migration est-elle payante ?</h3>
+<p>Chez LE WEB MAX, la migration de vos anciens e-mails est incluse dans l'abonnement Google Workspace.</p>
+
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Vais-je perdre des e-mails pendant la migration vers Google Workspace ?","acceptedAnswer":{"@type":"Answer","text":"Non, si l'ordre est respecté : comptes Google créés, e-mails copiés, MX basculés, puis synchronisation finale. Les messages arrivés pendant la bascule sont récupérés à la dernière étape."}},{"@type":"Question","name":"Combien de temps dure une migration vers Google Workspace ?","acceptedAnswer":{"@type":"Answer","text":"Pour une PME de quelques utilisateurs, la copie prend en général quelques heures, puis on attend un à deux jours pour la synchronisation finale. Le volume des boîtes et la vitesse du serveur d'origine font varier la durée."}},{"@type":"Question","name":"La migration vers Google Workspace est-elle payante ?","acceptedAnswer":{"@type":"Answer","text":"Chez LE WEB MAX, la migration de vos anciens e-mails est incluse dans l'abonnement Google Workspace."}}]}</script>

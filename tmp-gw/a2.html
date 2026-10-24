@@ -1,0 +1,80 @@
+<div class="lwm-ans" style="margin:0 0 1.6em;padding:1.1em 1.3em;border-left:4px solid #030673;background:#f5f8ff;border-radius:12px"><p style="margin:0"><strong>En bref :</strong> pour avoir une adresse Gmail professionnelle comme <em>contact@votre-entreprise.cd</em>, il faut trois choses : un nom de domaine, un abonnement Google Workspace et cinq réglages DNS (vérification, MX, SPF, DKIM, DMARC). À Kinshasa et partout en RDC, LE WEB MAX s'occupe de tout pour 10 $ par adresse et par mois, payable en Mobile Money.</p></div>
+
+<p>Un commerçant de la Gombe, une clinique de Lubumbashi ou un cabinet d'avocats de Goma ont tous le même besoin : écrire à leurs clients depuis une adresse qui porte leur nom, sans abandonner Gmail, qu'ils utilisent déjà sur leur téléphone. C'est exactement ce que permet Google Workspace. Voici la méthode complète, étape par étape, et les erreurs à éviter.</p>
+
+<h2>Gmail gratuit ou Gmail professionnel : quelle différence ?</h2>
+<figure class="wp-block-table"><table>
+<thead><tr><th></th><th>Gmail gratuit</th><th>Gmail professionnel (Google Workspace)</th></tr></thead>
+<tbody>
+<tr><td>Adresse</td><td>nom.entreprise@gmail.com</td><td>contact@votre-entreprise.cd</td></tr>
+<tr><td>Propriétaire du compte</td><td>La personne qui l'a créé</td><td>L'entreprise, via la console d'administration</td></tr>
+<tr><td>Départ d'un employé</td><td>Le compte part avec lui</td><td>Compte suspendu, e-mails transférés à un collègue</td></tr>
+<tr><td>Stockage</td><td>15 Go partagés avec les photos du téléphone</td><td>30 Go par utilisateur, réservés au travail</td></tr>
+<tr><td>Image auprès des clients</td><td>Peu professionnelle</td><td>Crédible, cohérente avec votre site</td></tr>
+</tbody>
+</table></figure>
+
+<h2>Étape 1 : choisir et enregistrer votre nom de domaine</h2>
+<p>Le nom de domaine est la partie après le @. En RDC, deux choix reviennent souvent :</p>
+<ul>
+<li><strong>.cd :</strong> l'extension congolaise, idéale pour montrer que vous êtes une entreprise locale ;</li>
+<li><strong>.com :</strong> l'extension internationale, utile si vous travaillez avec l'étranger.</li>
+</ul>
+<p>Choisissez un nom court, facile à dicter au téléphone, sans tirets inutiles. Vérifiez sa disponibilité sur notre page <a href="https://lewebmax.com/domain/">noms de domaine</a>. Important : le domaine doit être enregistré au nom de votre entreprise, jamais au nom d'un prestataire.</p>
+
+<h2>Étape 2 : souscrire Google Workspace</h2>
+<p>Chez LE WEB MAX, vous commandez Google Workspace depuis notre <a href="https://lewebmax.com/service/email-hosting/#google-workspace">page e-mails professionnels</a> : 10 $ par adresse et par mois, payable par 6 mois (60 $) ou 12 mois (120 $). Lors de la commande, vous indiquez les adresses à créer. Quelques conventions qui fonctionnent bien :</p>
+<ul>
+<li><strong>adresses de service :</strong> contact@, info@, factures@, recrutement@ ;</li>
+<li><strong>adresses nominatives :</strong> prenom.nom@ ou initiale + nom (j.mukendi@).</li>
+</ul>
+<p>Astuce pour économiser : une adresse de service peut être un <strong>alias</strong> ou un <strong>groupe</strong> qui arrive dans la boîte d'un utilisateur existant. Vous ne payez que les vraies boîtes, pas chaque adresse.</p>
+
+<h2>Étape 3 : configurer les DNS du domaine</h2>
+<p>C'est l'étape technique. Elle dit au reste d'Internet que vos e-mails sont gérés par Google. Si votre domaine est chez LE WEB MAX, nous la faisons pour vous. Pour information, voici ce qui est ajouté :</p>
+<figure class="wp-block-table"><table>
+<thead><tr><th>Enregistrement</th><th>Type</th><th>Rôle</th></tr></thead>
+<tbody>
+<tr><td>Vérification Google</td><td>TXT</td><td>Prouve à Google que le domaine vous appartient</td></tr>
+<tr><td>MX</td><td>MX</td><td>Envoie les e-mails reçus vers Gmail (serveur <code>smtp.google.com</code>)</td></tr>
+<tr><td>SPF</td><td>TXT</td><td><code>v=spf1 include:_spf.google.com ~all</code> : autorise Google à envoyer pour votre domaine</td></tr>
+<tr><td>DKIM</td><td>TXT</td><td>Signature numérique générée dans la console Google, contre l'usurpation</td></tr>
+<tr><td>DMARC</td><td>TXT</td><td>Indique aux autres serveurs quoi faire des faux e-mails à votre nom</td></tr>
+</tbody>
+</table></figure>
+<p>Sans SPF, DKIM et DMARC, vos e-mails risquent d'arriver dans le dossier spam de vos clients, notamment chez Gmail et Outlook, qui ont durci leurs règles. C'est l'erreur la plus fréquente des installations faites à la va-vite.</p>
+
+<h2>Étape 4 : se connecter sur ordinateur et téléphone</h2>
+<ul>
+<li><strong>Sur ordinateur :</strong> rendez-vous sur gmail.com et connectez-vous avec votre nouvelle adresse et le mot de passe temporaire. Changez-le immédiatement.</li>
+<li><strong>Sur Android ou iPhone :</strong> dans l'application Gmail, appuyez sur votre photo, puis « Ajouter un compte », puis « Google ». Vos comptes personnel et professionnel restent séparés dans la même application.</li>
+<li><strong>Validation en deux étapes :</strong> activez-la dès le premier jour, avec un code par SMS ou, mieux, l'application Google Authenticator.</li>
+</ul>
+
+<div class="lwm-cta" style="margin:2em 0;padding:1.5em;border-radius:14px;background:linear-gradient(135deg,#0b2a6f,#1f5eff);color:#fff"><p style="margin:0 0 .4em;font-size:1.25em;color:#fff"><strong>Votre Gmail professionnel prêt sans toucher aux DNS</strong></p><p style="margin:0 0 1em;color:#e8eeff">Nous créons vos adresses, configurons MX, SPF, DKIM et DMARC, et migrons vos anciens e-mails. Paiement M-Pesa, Orange Money, Airtel Money ou carte.</p><a href="https://my.lewebmax.com/index.php?rp=/store/hebergement-email/google-workspace" style="display:inline-block;background:#fff;color:#0b2a6f;font-weight:700;padding:.7em 1.2em;border-radius:10px;text-decoration:none">Commander Google Workspace</a></div>
+
+<h2>Étape 5 : soigner la signature et les premiers envois</h2>
+<p>Ajoutez une signature avec votre nom, votre fonction, un numéro joignable (avec l'indicatif +243), l'adresse de vos bureaux et votre site web. Évitez les grandes images : elles alourdissent les messages, ce qui gêne les destinataires qui ont une connexion lente.</p>
+<p>Envoyez ensuite un test vers une adresse Gmail et une adresse Outlook : le message doit arriver dans la boîte de réception, pas dans le spam.</p>
+
+<h2>Les erreurs à éviter</h2>
+<ol>
+<li><strong>Enregistrer le domaine au nom d'un prestataire :</strong> vous en perdriez le contrôle.</li>
+<li><strong>Oublier SPF, DKIM ou DMARC :</strong> vos e-mails partent en spam.</li>
+<li><strong>Partager un même compte entre plusieurs personnes :</strong> utilisez plutôt un groupe ou une délégation de boîte.</li>
+<li><strong>Laisser le mot de passe temporaire :</strong> changez-le à la première connexion.</li>
+<li><strong>Supprimer l'ancienne messagerie trop tôt :</strong> attendez que la migration soit terminée et vérifiée.</li>
+</ol>
+
+<p>Vous hésitez encore entre Google Workspace et une messagerie hébergée moins chère ? Lisez notre comparatif <a href="https://lewebmax.com/google-workspace-ou-email-cpanel-rdc/">Google Workspace ou e-mails cPanel</a>, ou notre <a href="https://lewebmax.com/google-workspace-rdc-guide-entreprises/">guide complet de Google Workspace en RDC</a>.</p>
+
+<h2>Questions fréquentes</h2>
+<h3>Combien de temps faut-il pour avoir son adresse Gmail professionnelle ?</h3>
+<p>Une fois le paiement reçu et le domaine accessible, notre équipe configure votre domaine et crée vos adresses, puis vous envoie vos identifiants. La propagation des réglages DNS peut ensuite prendre de quelques minutes à quelques heures.</p>
+<h3>Puis-je utiliser mon adresse professionnelle dans l'application Gmail de mon téléphone ?</h3>
+<p>Oui. Ajoutez simplement le compte dans l'application Gmail : vos e-mails personnels et professionnels restent séparés.</p>
+<h3>Combien d'adresses dois-je payer ?</h3>
+<p>Une par personne qui a sa propre boîte. Les adresses de service comme contact@ ou info@ peuvent être des alias ou des groupes, sans coût supplémentaire.</p>
+
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"HowTo","name":"Créer une adresse Gmail professionnelle à votre nom de domaine","description":"Les étapes pour obtenir une adresse du type contact@votre-entreprise.cd avec Google Workspace en RDC.","step":[{"@type":"HowToStep","name":"Choisir et enregistrer votre nom de domaine","text":"Choisissez un domaine .cd ou .com court, enregistré au nom de votre entreprise."},{"@type":"HowToStep","name":"Souscrire Google Workspace","text":"Commandez le nombre d'adresses nécessaires, 10 $ par adresse et par mois, payable en Mobile Money."},{"@type":"HowToStep","name":"Configurer les DNS","text":"Ajoutez la vérification Google, les enregistrements MX, SPF, DKIM et DMARC."},{"@type":"HowToStep","name":"Se connecter sur ordinateur et téléphone","text":"Connectez-vous sur gmail.com ou dans l'application Gmail, changez le mot de passe et activez la validation en deux étapes."},{"@type":"HowToStep","name":"Soigner la signature et tester","text":"Ajoutez une signature légère et vérifiez que vos e-mails arrivent bien en boîte de réception."}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Combien de temps faut-il pour avoir son adresse Gmail professionnelle ?","acceptedAnswer":{"@type":"Answer","text":"Une fois le paiement reçu et le domaine accessible, notre équipe configure votre domaine et crée vos adresses, puis vous envoie vos identifiants. La propagation des réglages DNS peut ensuite prendre de quelques minutes à quelques heures."}},{"@type":"Question","name":"Puis-je utiliser mon adresse professionnelle dans l'application Gmail de mon téléphone ?","acceptedAnswer":{"@type":"Answer","text":"Oui. Ajoutez simplement le compte dans l'application Gmail : vos e-mails personnels et professionnels restent séparés."}},{"@type":"Question","name":"Combien d'adresses dois-je payer ?","acceptedAnswer":{"@type":"Answer","text":"Une par personne qui a sa propre boîte. Les adresses de service comme contact@ ou info@ peuvent être des alias ou des groupes, sans coût supplémentaire."}}]}</script>
