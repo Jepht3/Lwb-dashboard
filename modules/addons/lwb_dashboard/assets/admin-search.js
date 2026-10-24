@@ -32,7 +32,7 @@
     back.className = 'lwbk-back';
     back.hidden = true;
     back.innerHTML = '<div class="lwbk" role="dialog" aria-modal="true" aria-label="Recherche rapide">'
-        + '<div class="lwbk-in">' + icon + '<input type="search" autocomplete="off" spellcheck="false" placeholder="Réglage, client, facture, domaine, ticket…" aria-label="Rechercher"><kbd>Échap</kbd></div>'
+        + '<div class="lwbk-in">' + icon + '<input type="text" autocomplete="off" spellcheck="false" placeholder="Réglage, client, facture, domaine, ticket…" aria-label="Rechercher"><kbd>Échap</kbd></div>'
         + '<ul class="lwbk-list" role="listbox"></ul>'
         + '<div class="lwbk-foot"><span>↑ ↓ pour choisir</span><span>Entrée pour ouvrir</span><span>Ctrl+Entrée : nouvel onglet</span></div></div>';
     document.body.appendChild(back);

@@ -322,6 +322,9 @@ a.lwbd-kpi:hover{box-shadow:0 6px 18px rgba(13,13,43,.08); transform:translateY(
 .lwbd-testform .lwbd-btn{gap:8px; cursor:pointer}
 @media (max-width:767px){
   .lwbd-kpis-mini{grid-template-columns:1fr}
+  .lwbd-kpis-mini .lwbd-kpi{padding:10px 12px 10px 52px}
+  .lwbd-kpis-mini .lwbd-kpi-ic{position:absolute; left:12px; top:12px; margin:0}
+  .lwbd-kpis-mini .lwbd-kpi-value{font-size:18px}
   .lwbd-actlist .lwbd-todo-acts{flex:1 1 100%; justify-content:flex-start}
   .lwbd-actlist .lwbd-todo-acts .lwbd-act-btn:not(.ghost){height:42px}
   .lwbd-testform{justify-content:stretch} .lwbd-testform .lwbd-btn{width:100%; justify-content:center}

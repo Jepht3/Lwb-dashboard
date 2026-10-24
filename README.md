@@ -14,6 +14,32 @@ Votre nom, votre logo, vos couleurs et votre police se règlent dans la page Ré
 
 ![Aperçu sur ordinateur](docs/apercu-bureau.png)
 
+## Surveillance, sécurité et analyses (2.3)
+
+### Santé du système étendue
+En plus du cron et du registraire : **passerelle WhatsApp** (module lwb-whmcs-wha), **file d'e-mails** (envois échoués ou bloqués), **certificat SSL** de l'adresse WHMCS, **dernière sauvegarde** de la base (dossier détecté automatiquement ou indiqué dans les réglages) et **espace disque** (quota cPanel si disponible). Chaque problème grave remonte dans « À faire » et dans la cloche.
+
+### Alertes à l'équipe
+Au plus toutes les 15 minutes, chaque problème grave part **une fois par jour** sur le WhatsApp de l'équipe (numéros du module WhatsApp), ou par e-mail aux administrateurs si WhatsApp est indisponible, puis un message **« Résolu »** quand il disparaît.
+
+### Suspensions imminentes
+Les factures dont les services seront suspendus automatiquement d'ici 2 jours, avec **dernier rappel WhatsApp**, **appel** et **délai de 3 ou 7 jours** (report de la suspension automatique des services concernés).
+
+### Sécurité
+- Analyse quotidienne des fichiers PHP et `.htaccess` de WHMCS : nouveaux, modifiés, supprimés ; noms et contenus suspects signalés (portes dérobées courantes). Une mise à jour de WHMCS refait l'index sans alerte.
+- Connexions administrateur depuis un **nouveau lieu** (pays si le module lwb_ip le connaît, sinon réseau).
+- Échecs de connexion à l'administration et IP les plus actives.
+
+### Marge réelle et fidélité
+- **Marge** : encaissements nets moins le coût d'achat des domaines vendus (par extension) et vos frais fixes mensuels, à renseigner dans les réglages.
+- **Fidélité** : revenu récurrent gagné et perdu chaque mois, taux de perte sur 90 jours, clients partis, services et domaines non renouvelés. L'historique du revenu récurrent est mémorisé chaque jour.
+
+### Résumé du matin
+Avec la tâche quotidienne de WHMCS : encaissé la veille, objectif du mois, impayés, suspensions du jour, renouvellements, tickets, commandes, état du système et sécurité, sur WhatsApp (ou par e-mail). Bouton « Envoyer maintenant » dans les réglages.
+
+### Recherche rapide (Ctrl+K)
+Sur toutes les pages : réglages WHMCS, clients, factures, commandes, domaines, services et tickets, au clavier. Sur téléphone, bouton loupe dans la barre du haut.
+
 ## Outils de travail (1.4)
 
 ### File « À faire »
@@ -171,12 +197,18 @@ modules/addons/lwb_dashboard/
 ├── lib/brand.php       marque, devise, police, registraire, intégration FlexPay
 ├── lib/data.php        calcul des chiffres (requêtes en lecture seule)
 ├── lib/health.php      santé du système, objectif et prévisions
+├── lib/monitor.php     surveillance (WhatsApp, e-mails, SSL, sauvegardes, disque) et alertes
+├── lib/security.php    fichiers modifiés, connexions administrateur
+├── lib/insights.php    suspensions imminentes, marge réelle, fidélité
+├── lib/digest.php      résumé du matin
+├── lib/search.php      menu des réglages et recherche rapide
 ├── lib/actions.php     actions (relance, réglages, file « À faire ») avec jeton CSRF WHMCS
 ├── lib/todo.php        file « À faire », liens WhatsApp et de paiement
 ├── lib/notify.php      centre de notifications
 ├── lib/view.php        affichage HTML et graphiques SVG
 ├── lib/lang.php        corrections de la traduction française (overrides)
-└── assets/             styles et info-bulles
+└── assets/             styles, info-bulles, recherche rapide (admin-search.js)
+tests/run.php           tests des fonctions pures (php tests/run.php)
 ```
 
 ## Aperçu mobile
@@ -186,6 +218,16 @@ modules/addons/lwb_dashboard/
 Les captures utilisent des données d'exemple.
 
 ## Historique
+
+- **2.3** :
+  - santé du système étendue (WhatsApp, e-mails, SSL, sauvegarde, disque) et alertes WhatsApp / e-mail à l'équipe ;
+  - carte « Suspensions imminentes » avec rappel WhatsApp, appel et délai ;
+  - carte « Sécurité » : fichiers PHP modifiés, connexions depuis un nouveau lieu, échecs de connexion ;
+  - cartes « Marge réelle » et « Fidélité des clients » ;
+  - résumé du matin sur WhatsApp ;
+  - recherche rapide Ctrl+K ;
+  - menu « Configuration » du rail avec tous les réglages WHMCS ;
+  - tests automatiques et intégration continue (GitHub Actions).
 
 - **2.1** :
   - les factures groupées ne sont plus comptées en double dans les impayés ;

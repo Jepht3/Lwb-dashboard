@@ -575,7 +575,7 @@ function lwbd_retention_html(array $r)
     $html = '<div class="lwbd-kpis lwbd-kpis-mini">'
         . lwbd_kpi('repeat', 'Revenu récurrent', lwbd_e(lwbd_money($r['mrr'])), $delta === null ? 'Évolution visible après 30 jours d\'historique'
             : '<span class="lwbd-delta ' . ($delta >= 0 ? 'up' : 'down') . '">' . ($delta >= 0 ? '+' : '−') . lwbd_e(lwbd_money(abs($delta))) . '</span> en 30 jours')
-        . lwbd_kpi('down', 'Perdu sur 90 jours', lwbd_e(lwbd_money($r['lost90_mrr'])) . '<small> / mois</small>', count($r['lost90']) . ' service(s) ou domaine(s) · ' . $r['lost_clients'] . ' client(s) parti(s)', null, $r['lost90'] ? 'is-alert' : '')
+        . lwbd_kpi('down', 'Perdu sur 90 jours', lwbd_e(lwbd_money($r['lost90_mrr'])), 'par mois · ' . count($r['lost90']) . ' service(s) ou domaine(s) · ' . $r['lost_clients'] . ' client(s) parti(s)', null, $r['lost90'] ? 'is-alert' : '')
         . lwbd_kpi('alert', 'Taux de perte (90 j)', lwbd_e(number_format($r['churn90'], 1, ',', ' ')) . '&nbsp;%', 'Sur ' . $r['active'] . ' services et domaines actifs', null, $r['churn90'] >= 10 ? 'is-alert' : '')
         . '</div>';
     $max = max(1, max(array_map(function ($s) {
