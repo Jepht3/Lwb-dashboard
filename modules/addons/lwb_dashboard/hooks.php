@@ -10,6 +10,12 @@ if (!defined('WHMCS')) {
 require_once __DIR__ . '/lib/brand.php';
 require_once __DIR__ . '/lib/data.php';
 require_once __DIR__ . '/lib/health.php';
+require_once __DIR__ . '/lib/monitor.php';
+require_once __DIR__ . '/lib/security.php';
+require_once __DIR__ . '/lib/insights.php';
+require_once __DIR__ . '/lib/digest.php';
+require_once __DIR__ . '/lib/search.php';
+require_once __DIR__ . '/lib/actions.php';
 require_once __DIR__ . '/lib/view.php';
 require_once __DIR__ . '/lib/todo.php';
 require_once __DIR__ . '/lib/notify.php';
@@ -28,73 +34,6 @@ function lwbd_admin_allowed()
     return in_array($role, array_map('intval', explode(',', lwbd_settings()['access'])), true);
 }
 
-/** Menu « Configuration » du rail : tous les réglages WHMCS, groupés (WHMCS vérifie les droits sur chaque page). */
-function lwbd_setup_menu()
-{
-    $r = function ($name, $fallback) {
-        try {
-            return function_exists('routePath') ? (string) routePath($name) : $fallback;
-        } catch (\Throwable $e) {
-            return $fallback;
-        }
-    };
-    return [
-        ['Réglages', [
-            ['Paramètres système', $r('admin-setup-index', 'configgeneral.php')],
-            ['Paramètres généraux', 'configgeneral.php'],
-            ['Applications et intégrations', $r('admin-apps-index', 'configaddonmods.php')],
-            ['Intégrations de connexion', $r('admin-setup-authn-view', 'configgeneral.php')],
-            ['Automatisation', 'configauto.php'],
-            ['MarketConnect', 'marketconnect.php'],
-            ['Notifications', $r('admin-setup-notifications-overview', 'configgeneral.php')],
-            ['Stockage', $r('admin-setup-storage-index', 'configgeneral.php')],
-            ['Liens d\'application (cPanel)', 'configapplinks.php'],
-            ['OpenID Connect', 'configopenid.php'],
-            ['Modèles d\'e-mails', 'configemailtemplates.php'],
-            ['Modules complémentaires', 'configaddonmods.php'],
-            ['Groupes de clients', 'configclientgroups.php'],
-            ['Champs personnalisés', 'configcustomfields.php'],
-            ['Anti-fraude', 'configfraud.php'],
-        ]],
-        ['Équipe', [
-            ['Administrateurs', 'configadmins.php'],
-            ['Rôles', 'configadminroles.php'],
-            ['Double authentification', 'configtwofa.php'],
-            ['Identifiants API', 'configapicredentials.php'],
-        ]],
-        ['Paiements', [
-            ['Devises', 'configcurrencies.php'],
-            ['Passerelles de paiement', 'configgateways.php'],
-            ['Taxes', $r('admin-setup-payments-tax-index', 'configtax.php')],
-            ['Promotions', 'configpromotions.php'],
-        ]],
-        ['Produits', [
-            ['Produits et services', 'configproducts.php'],
-            ['Options configurables', 'configproductoptions.php'],
-            ['Options de produits (addons)', 'configaddons.php'],
-            ['Packs', 'configbundles.php'],
-            ['Tarifs des domaines', 'configdomains.php'],
-            ['Registrars', 'configregistrars.php'],
-            ['Serveurs', 'configservers.php'],
-        ]],
-        ['Support', [
-            ['Départements', 'configticketdepartments.php'],
-            ['Statuts des tickets', 'configticketstatuses.php'],
-            ['Règles d\'escalade', 'configticketescalations.php'],
-            ['Anti-spam', 'configticketspamcontrol.php'],
-        ]],
-        ['Autres', [
-            ['Statuts des commandes', 'configorderstatuses.php'],
-            ['Questions de sécurité', 'configsecurityqs.php'],
-            ['IP bannies', 'configbannedips.php'],
-            ['E-mails bannis', 'configbannedemails.php'],
-            ['Sauvegardes', 'configbackups.php'],
-            ['Santé et mises à jour', 'systemhealthandupdates.php'],
-            ['Assistant de configuration', $r('admin-getting-started-index', 'configgeneral.php')],
-        ]],
-    ];
-}
-
 /** Nombre d'éléments « À faire », gardé 60 s en session pour ne pas recalculer à chaque page. */
 function lwbd_todo_count_cached()
 {
@@ -108,7 +47,7 @@ function lwbd_todo_count_cached()
 
 /**
  * Données pour le navigateur (JSON) : notifications et message WhatsApp d'une facture.
- * addonmodules.php?module=lwb_dashboard&lwbd_ajax=notif | wa&invoice=ID
+ * addonmodules.php?module=lwb_dashboard&lwbd_ajax=notif | search&q=… | wa&invoice=ID
  */
 add_hook('AdminAreaPage', 0, function ($vars) {
     if (($vars['filename'] ?? '') !== 'addonmodules' || ($_GET['module'] ?? '') !== 'lwb_dashboard' || !isset($_GET['lwbd_ajax'])) {
@@ -127,6 +66,8 @@ add_hook('AdminAreaPage', 0, function ($vars) {
         }
         if ($_GET['lwbd_ajax'] === 'notif') {
             echo json_encode(lwbd_notifications(), JSON_INVALID_UTF8_SUBSTITUTE);
+        } elseif ($_GET['lwbd_ajax'] === 'search') {
+            echo json_encode(['q' => (string) ($_GET['q'] ?? ''), 'results' => lwbd_search((string) ($_GET['q'] ?? ''))], JSON_INVALID_UTF8_SUBSTITUTE | JSON_UNESCAPED_UNICODE);
         } elseif ($_GET['lwbd_ajax'] === 'wa') {
             $wa = lwbd_wa_invoice((int) ($_GET['invoice'] ?? 0));
             echo json_encode($wa ? ['phone' => $wa['phone'], 'url' => $wa['url'], 'link' => $wa['link'], 'client' => $wa['client']] : ['error' => 'not_found'], JSON_INVALID_UTF8_SUBSTITUTE);
@@ -216,6 +157,43 @@ add_hook('AdminAreaFooterOutput', 1, function ($vars) {
             . '<script src="' . $base . 'admin-tools.js?v=' . @filemtime(__DIR__ . '/assets/admin-tools.js') . '"></script>';
     } catch (\Throwable $e) {
         return '';
+    }
+});
+
+/** Recherche rapide (Ctrl+K) sur toutes les pages, pour les administrateurs autorisés. */
+add_hook('AdminAreaFooterOutput', 2, function ($vars) {
+    try {
+        if (!lwbd_admin_allowed()) {
+            return '';
+        }
+        $base = rtrim((string) \WHMCS\Config\Setting::getValue('SystemURL'), '/') . '/modules/addons/lwb_dashboard/assets/';
+        return '<script>window.LWBD_SEARCH=' . json_encode(['url' => 'addonmodules.php?module=lwb_dashboard&lwbd_ajax=search&q='], JSON_UNESCAPED_SLASHES | JSON_HEX_TAG) . ';</script>'
+            . '<script src="' . $base . 'admin-search.js?v=' . @filemtime(__DIR__ . '/assets/admin-search.js') . '"></script>';
+    } catch (\Throwable $e) {
+        return '';
+    }
+});
+
+/** Surveillance : alertes à l'équipe (au plus toutes les 15 minutes). */
+add_hook('AfterCronJob', 50, function ($vars) {
+    try {
+        lwbd_alerts_run();
+    } catch (\Throwable $e) {
+        logActivity('Lwb-dashboard (alertes) : ' . $e->getMessage());
+    }
+});
+
+/**
+ * Tâche quotidienne : historique du revenu récurrent, analyse des fichiers, puis
+ * résumé du matin (l'analyse passe avant pour que le résumé en tienne compte).
+ */
+add_hook('DailyCronJob', 50, function ($vars) {
+    foreach (['lwbd_mrr_snapshot', 'lwbd_files_scan', 'lwbd_digest_send'] as $fn) {
+        try {
+            $fn();
+        } catch (\Throwable $e) {
+            logActivity('Lwb-dashboard (' . $fn . ') : ' . $e->getMessage());
+        }
     }
 });
 

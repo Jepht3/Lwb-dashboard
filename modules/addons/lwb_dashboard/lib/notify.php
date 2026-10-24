@@ -61,5 +61,13 @@ function lwbd_notifications($limit = 40)
         $reg = lwbd_main_registrar();
         $sticky[] = ['t' => time(), 'type' => 'alert', 'icon' => 'fa-wallet', 'title' => 'Crédit ' . $reg['name'] . ' épuisé', 'text' => 'Les enregistrements et renouvellements échouent.', 'href' => $reg['url'], 'level' => 'critical', 'sticky' => true];
     }
+    try {
+        foreach (lwbd_monitor() as $m) {
+            if ($m['level'] === 'critical') {
+                $sticky[] = ['t' => time(), 'type' => 'alert', 'icon' => 'fa-heartbeat', 'title' => $m['title'], 'text' => $m['text'], 'href' => $m['href'], 'level' => 'critical', 'sticky' => true];
+            }
+        }
+    } catch (\Throwable $e) {
+    }
     return ['now' => time(), 'sticky' => $sticky, 'events' => $ev, 'todo' => lwbd_todo_items(true)];
 }

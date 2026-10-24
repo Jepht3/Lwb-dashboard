@@ -29,7 +29,7 @@ function lwbd_reminder_template($late)
 function lwbd_handle_actions()
 {
     $action = ($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' ? ($_POST['lwbd_action'] ?? '') : '';
-    if (!in_array($action, ['remind', 'settings', 'accept_order', 'activate_service', 'snooze', 'domain_notice'], true)) {
+    if (!in_array($action, ['remind', 'settings', 'accept_order', 'activate_service', 'snooze', 'domain_notice', 'delay_suspension', 'wa_last', 'files_ack', 'digest_test'], true)) {
         return null;
     }
     if (function_exists('check_token')) {
@@ -37,6 +37,22 @@ function lwbd_handle_actions()
     }
     if ($action === 'settings') {
         return lwbd_save_settings($_POST);
+    }
+    if ($action === 'delay_suspension') {
+        return lwbd_delay_suspension((int) ($_POST['invoice'] ?? 0), (int) ($_POST['days'] ?? 3));
+    }
+    if ($action === 'wa_last') {
+        return lwbd_wa_last_reminder((int) ($_POST['invoice'] ?? 0));
+    }
+    if ($action === 'files_ack') {
+        lwbd_files_ack();
+        logActivity('Lwb-dashboard : changements de fichiers vérifiés et acquittés');
+        return ['success', 'Liste des fichiers vidée. Les prochains changements seront signalés.'];
+    }
+    if ($action === 'digest_test') {
+        $channel = lwbd_digest_send(true);
+        return $channel === 'whatsapp' ? ['success', 'Résumé mis en file : il arrive sur WhatsApp dans quelques minutes (prochain passage du cron).']
+            : ($channel === 'email' ? ['success', 'WhatsApp indisponible : résumé envoyé par e-mail aux administrateurs.'] : ['danger', 'Résumé non envoyé : aucun numéro d\'équipe WhatsApp ni e-mail administrateur disponible.']);
     }
     if ($action !== 'remind') {
         return lwbd_todo_action($action, $_POST);
@@ -83,6 +99,15 @@ function lwbd_save_settings(array $post)
     lwbd_save_setting('period', (string) $period);
     lwbd_save_setting('homepage', !empty($post['homepage']) ? 'on' : '');
     lwbd_save_setting('hidden', implode(',', $hidden));
+    lwbd_save_setting('alerts', !empty($post['alerts']) ? 'on' : '');
+    lwbd_save_setting('digest', !empty($post['digest']) ? 'on' : '');
+    $dir = trim((string) ($post['backup_dir'] ?? ''));
+    if ($dir !== '' && ($dir[0] !== '/' || strpos($dir, '..') !== false)) {
+        return ['danger', 'Le dossier des sauvegardes doit être un chemin absolu, par exemple /home/compte/whmcs_backups.'];
+    }
+    lwbd_save_setting('backup_dir', rtrim($dir, '/'));
+    lwbd_save_setting('costs_fixed', mb_substr(trim((string) ($post['costs_fixed'] ?? '')), 0, 4000));
+    lwbd_save_setting('costs_domains', mb_substr(trim((string) ($post['costs_domains'] ?? '')), 0, 4000));
     $theme = !empty($post['admin_theme']) ? 'on' : '';
     $themeChanged = $theme !== lwbd_settings()['admin_theme'];
     if ($themeChanged) {

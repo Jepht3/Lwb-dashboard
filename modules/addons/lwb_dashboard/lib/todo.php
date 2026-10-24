@@ -121,6 +121,28 @@ function lwbd_todo_items($countOnly = false)
         $add('system', 'sys:credit', ['level' => 'critical', 'title' => 'Crédit ' . $reg['name'] . ' épuisé', 'meta' => 'Les enregistrements et renouvellements de domaines échouent. Rechargez le compte puis relancez les domaines concernés.', 'href' => $reg['url'], 'external' => strpos($reg['url'], 'http') === 0]);
     }
 
+    // Surveillance (WhatsApp, e-mails, SSL, sauvegarde, disque) et sécurité.
+    try {
+        foreach (lwbd_monitor() as $m) {
+            if (in_array($m['level'], ['critical', 'serious'], true)) {
+                $add('system', 'sys:' . $m['key'], ['level' => $m['level'], 'title' => $m['title'], 'meta' => $m['text'], 'href' => $m['href'], 'external' => strpos($m['href'], 'http') === 0]);
+            }
+        }
+        $sec = lwbd_security();
+        if ($n = count($sec['new_files']) + count($sec['changed_files'])) {
+            $add('system', 'sys:files:' . (int) ($sec['files']['since'] ?? 0), ['level' => $sec['suspect'] ? 'critical' : 'serious',
+                'title' => $sec['suspect'] ? 'Fichier(s) suspect(s) dans WHMCS' : 'Fichiers PHP modifiés dans WHMCS',
+                'meta' => $n . ' fichier(s) à vérifier : ' . implode(', ', array_slice(array_column(array_merge($sec['new_files'], $sec['changed_files']), 'path'), 0, 3)), 'href' => 'addonmodules.php?module=lwb_dashboard#lwbd-security']);
+        }
+        foreach ($sec['logins']['new'] as $l) {
+            if (strtotime($l['time']) > time() - 7 * 86400) {
+                $add('system', 'sec:login:' . $l['id'], ['level' => 'serious', 'title' => 'Connexion admin depuis un nouveau lieu',
+                    'meta' => $l['admin'] . ' · ' . $l['where'] . ' · IP ' . $l['ip'] . ' · ' . date('d/m H:i', strtotime($l['time'])), 'href' => 'systemadminlog.php']);
+            }
+        }
+    } catch (\Throwable $e) {
+    }
+
     // Commandes à accepter.
     foreach (Capsule::table('tblorders as o')->join('tblclients as c', 'c.id', '=', 'o.userid')
         ->leftJoin('tblinvoices as i', 'i.id', '=', 'o.invoiceid')->where('o.status', 'Pending')->orderBy('o.date')
@@ -150,6 +172,8 @@ function lwbd_todo_items($countOnly = false)
     }
 
     // Factures dues sous 3 jours ou en retard depuis moins de 30 jours.
+    $auto = Capsule::table('tblconfiguration')->whereIn('setting', ['AutoSuspension', 'AutoSuspensionDays'])->pluck('value', 'setting')->all();
+    $suspDays = ($auto['AutoSuspension'] ?? '') === 'on' ? (int) ($auto['AutoSuspensionDays'] ?? 0) : 0;
     foreach (lwbd_unpaid_invoices() as $inv) {
         $balance = round((float) $inv->balance, 2);
         $late = lwbd_days_between($inv->duedate, $today);
@@ -158,7 +182,8 @@ function lwbd_todo_items($countOnly = false)
         }
         $add('invoices', 'inv:' . $inv->id, ['level' => $late > 4 ? 'critical' : ($late > 0 ? 'serious' : 'warning'), 'id' => (int) $inv->id, 'userid' => (int) $inv->userid,
             'title' => 'Facture n° ' . ($inv->invoicenum ?: $inv->id) . ' · ' . lwbd_client_name($inv),
-            'meta' => lwbd_money($balance) . ' · ' . ($late > 0 ? 'en retard de ' . $late . ' j' : ($late === 0 ? "échéance aujourd'hui" : 'échéance dans ' . (-$late) . ' j')),
+            'meta' => lwbd_money($balance) . ' · ' . ($late > 0 ? 'en retard de ' . $late . ' j' : ($late === 0 ? "échéance aujourd'hui" : 'échéance dans ' . (-$late) . ' j'))
+                . ($suspDays && $late >= max(1, $suspDays - 2) && $late <= $suspDays ? ' · suspension auto le ' . lwbd_date(lwbd_suspend_date($inv->duedate, $suspDays)) : ''),
             'href' => 'invoices.php?action=edit&id=' . $inv->id, 'late' => $late]);
     }
 

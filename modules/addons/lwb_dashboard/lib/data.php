@@ -103,21 +103,7 @@ function lwbd_collect($months = 12)
     $d['month'] = ['current' => $thisMonth, 'last' => $lastMonth, 'last_to_date' => round($lastMonthToDate, 2)];
 
     // Revenu récurrent mensuel ----------------------------------------
-    $mrr = 0.0;
-    foreach (Capsule::table('tblhosting')->where('domainstatus', 'Active')->get(['amount', 'billingcycle']) as $s) {
-        if (isset(LWBD_CYCLE_MONTHS[$s->billingcycle])) {
-            $mrr += (float) $s->amount / LWBD_CYCLE_MONTHS[$s->billingcycle];
-        }
-    }
-    foreach (Capsule::table('tblhostingaddons')->where('status', 'Active')->get(['recurring', 'billingcycle']) as $a) {
-        if (isset(LWBD_CYCLE_MONTHS[$a->billingcycle])) {
-            $mrr += (float) $a->recurring / LWBD_CYCLE_MONTHS[$a->billingcycle];
-        }
-    }
-    foreach (Capsule::table('tbldomains')->where('status', 'Active')->get(['recurringamount', 'registrationperiod']) as $dom) {
-        $mrr += (float) $dom->recurringamount / (12 * max(1, (int) $dom->registrationperiod));
-    }
-    $d['mrr'] = round($mrr, 2);
+    $d['mrr'] = lwbd_mrr();
 
     // Impayés par ancienneté ------------------------------------------
     $buckets = [
@@ -334,6 +320,12 @@ function lwbd_settings()
         'hidden' => array_values(array_filter(explode(',', (string) ($rows['hidden'] ?? '')))),
         'access' => (string) ($rows['access'] ?? ''),
         'admin_theme' => (string) ($rows['admin_theme'] ?? ''),
+        // Alertes et résumé du matin : actifs tant qu'ils n'ont pas été décochés.
+        'alerts' => (string) ($rows['alerts'] ?? 'on'),
+        'digest' => (string) ($rows['digest'] ?? 'on'),
+        'backup_dir' => (string) ($rows['backup_dir'] ?? ''),
+        'costs_fixed' => (string) ($rows['costs_fixed'] ?? ''),
+        'costs_domains' => (string) ($rows['costs_domains'] ?? ''),
     ];
 }
 

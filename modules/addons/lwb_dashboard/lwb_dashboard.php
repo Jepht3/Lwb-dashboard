@@ -20,6 +20,11 @@ if (!defined('WHMCS')) {
 require_once __DIR__ . '/lib/brand.php';
 require_once __DIR__ . '/lib/data.php';
 require_once __DIR__ . '/lib/health.php';
+require_once __DIR__ . '/lib/monitor.php';
+require_once __DIR__ . '/lib/security.php';
+require_once __DIR__ . '/lib/insights.php';
+require_once __DIR__ . '/lib/digest.php';
+require_once __DIR__ . '/lib/search.php';
 require_once __DIR__ . '/lib/actions.php';
 require_once __DIR__ . '/lib/todo.php';
 require_once __DIR__ . '/lib/notify.php';
@@ -30,8 +35,8 @@ function lwb_dashboard_config()
 {
     return [
         'name' => 'LWB Admin',
-        'description' => 'Tableau de bord et thème moderne de l\'administration : encaissements, revenu récurrent, impayés, renouvellements, domaines à risque, file « À faire » et notifications. Marque, couleurs et police réglables.',
-        'version' => '2.2',
+        'description' => 'Tableau de bord et thème moderne de l\'administration : encaissements, marge, fidélité, impayés, suspensions imminentes, renouvellements, domaines à risque, surveillance (WhatsApp, e-mails, SSL, sauvegardes, disque), sécurité, file « À faire », résumé du matin et alertes WhatsApp. Marque, couleurs et police réglables.',
+        'version' => '2.3',
         'author' => 'LEWEBMAX Admin',
         // Les réglages se font sur la page « Réglages » du tableau de bord, dans le même design.
         'fields' => [],
@@ -42,6 +47,9 @@ function lwb_dashboard_upgrade($vars)
 {
     lwbd_snooze_table();
     lwbd_reminders_table();
+    // 2.3 : état (cache, alertes, historique du revenu récurrent) et index des fichiers.
+    lwbd_state_table();
+    lwbd_files_table();
     // Traduction française corrigée de l'administration (« ticket », « Support »…).
     lwbd_lang_install();
     // 2.0 : la ligne de login.tpl charge la feuille de la marque au lieu de Google Fonts en dur.
@@ -56,6 +64,8 @@ function lwb_dashboard_activate()
 {
     lwbd_snooze_table();
     lwbd_reminders_table();
+    lwbd_state_table();
+    lwbd_files_table();
     lwbd_login_css_write();
     lwbd_lang_install();
     return ['status' => 'success', 'description' => 'Tableau de bord activé : Modules complémentaires > Lwb-dashboard, et widget sur l\'accueil de l\'administration.'];
@@ -84,12 +94,25 @@ function lwb_dashboard_output($vars)
         $show = function ($key) use ($set) {
             return !in_array($key, $set['hidden'], true);
         };
+        $health = null;
+        if ($show('health')) {
+            $health = lwbd_health();
+            $health['monitor'] = lwbd_monitor(isset($_GET['refresh']));
+        }
+        // Premier affichage : on commence l'historique du revenu récurrent sans attendre le cron.
+        if (!lwbd_state_get('mrr_history')) {
+            lwbd_mrr_snapshot();
+        }
         echo lwbd_render($d, $vars['modulelink'], [
             'flash' => $flash,
             'token' => $token,
             'hidden' => $set['hidden'],
             'forecast' => $show('goal') ? lwbd_forecast($d, (float) $set['goal']) : null,
-            'health' => $show('health') ? lwbd_health() : null,
+            'health' => $health,
+            'suspensions' => $show('suspensions') ? lwbd_suspensions() : null,
+            'security' => $show('security') ? lwbd_security() : null,
+            'margin' => $show('margin') ? lwbd_margin(6) : null,
+            'retention' => $show('retention') ? lwbd_retention(6) : null,
             'todo_count' => lwbd_todo_items(true),
             'linktoken' => function_exists('generate_token') ? generate_token('link') : '',
         ]);
